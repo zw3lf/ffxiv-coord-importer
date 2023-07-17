@@ -1,0 +1,15 @@
+{
+  "Author": "zw3lf",
+  "Name": "Coordinate Importer",
+  "Punchline": "Import map coordinates to echo chat.",
+  "Description": "Import map coordinates from various sources (e.g. Siren Hunts or Bear Toolkit) and dump them into echo chat. Use /ci to open the dialog box.",
+  "InternalName": "coordImporter",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "map",
+    "plugin",
+    "hunt",
+    "train",
+    "coordinate"
+  ]
+}
