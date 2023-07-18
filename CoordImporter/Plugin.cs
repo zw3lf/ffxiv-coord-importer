@@ -152,7 +152,16 @@ namespace CoordImporter
                 Map? map = FindMapIdByName(groups["map_name"].Value.Trim());
                 var markName = groups["mark_name"].Value;
                 var x = float.Parse(groups["x_coord"].Value);
+                // This disgusting hack is courtesy of a bug where the decimal point seems to have gotten
+                // lost in some step. I hate this and want it to be temporary but I am lazy
+                if (x > 50.0f) {
+                    x /= 10;
+                }
                 var y = float.Parse(groups["y_coord"].Value);
+                if (y > 50.0f)
+                {
+                    y /= 10;
+                }
                 if (map != null)
                 {
                     output = this.CreateMapLink(map.TerritoryType.Value!.RowId, map.RowId, x, y, instanceId, markName);
