@@ -104,11 +104,11 @@ namespace CoordImporter
                 new string[] { "\r\n", "\r", "\n" },
                 StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             var sirenRegex = new Regex(
-                @"(\(Maybe: (?<mark_name>[\w+ ]+)\) \ue0bb)?(?<map_name>[\w+ ]+)(?<instance_id>[\ue0b1\ue0b2\ue0b3]?)\s+\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
+                @"(\(Maybe: (?<mark_name>[\w+ -]+)\) \ue0bb)?(?<map_name>[\w+ ]+)(?<instance_id>[\ue0b1\ue0b2\ue0b3]?)\s+\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
                 RegexOptions.Compiled);
             var bearRegex =
                 new Regex(
-                    @"(?<map_name>[a-zA-Z'\s+-]*)\s*(?<instance_number>[123]?)\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)\s*(?<mark_name>[\w+ +]+)",
+                    @"(?<map_name>[a-zA-Z'\s+-]*)\s*(?<instance_number>[123]?)\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)\s*(?<mark_name>[\w+ +-]+)",
                     RegexOptions.Compiled);
 
             foreach (var inputLine in splitStrings)
