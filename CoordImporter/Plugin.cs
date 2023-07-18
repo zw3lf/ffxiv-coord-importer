@@ -131,12 +131,12 @@ namespace CoordImporter
                     {
                         var unavailableMark = new SeStringBuilder();
                         unavailableMark.Append($"Input {inputLine} does not have coordinates. Ignoring");
-                        this.Chat.PrintChat(new XivChatEntry
-                        {
-                            Type = type,
-                            Name = "",
-                            Message = unavailableMark.Build()
-                        });
+                        // this.Chat.PrintChat(new XivChatEntry
+                        // {
+                        //     Type = type,
+                        //     Name = "",
+                        //     Message = unavailableMark.Build()
+                        // });
                         continue;
                     }
 
