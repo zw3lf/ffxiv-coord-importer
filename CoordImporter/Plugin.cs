@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
+using Dalamud.Configuration;
 using Dalamud.Plugin;
 using System.Text.RegularExpressions;
 using Dalamud.Data;
@@ -23,7 +24,6 @@ namespace CoordImporter
 
         private DalamudPluginInterface PluginInterface { get; init; }
         private CommandManager CommandManager { get; init; }
-        public Configuration Configuration { get; init; }
         public WindowSystem WindowSystem = new("CoordinateImporter");
         private ChatGui Chat { get; }
         public DataManager DataManager { get; }
@@ -41,8 +41,6 @@ namespace CoordImporter
             this.CommandManager = commandManager;
             this.Chat = chat;
             this.DataManager = dataManager;
-            this.Configuration = this.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-            this.Configuration.Initialize(this.PluginInterface);
 
             // A nice little bit of jank
             // Dalamud has all the map data indexed by ID. We want it by name. So let's make a local copy of that
@@ -103,13 +101,18 @@ namespace CoordImporter
             var splitStrings = pastedPayload.Split(
                 new string[] { "\r\n", "\r", "\n" },
                 StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            // For the format "(Maybe: Storsie) \ue0bbLabyrinthos ( 17  , 9.6 ) " (including the icky unicode instance/arrow)
             var sirenRegex = new Regex(
                 @"(\(Maybe: (?<mark_name>[\w+ -]+)\) \ue0bb)?(?<map_name>[\w+ ]+)(?<instance_id>[\ue0b1\ue0b2\ue0b3]?)\s+\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
                 RegexOptions.Compiled);
-            var bearRegex =
-                new Regex(
-                    @"(?<map_name>[a-zA-Z'\s+-]*)\s*(?<instance_number>[123]?)\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)\s*(?<mark_name>[\w+ +-]+)",
-                    RegexOptions.Compiled);
+            // For the format "Labyrinthos ( 16.5 , 16.8 ) Storsie"
+            var bearRegex = new Regex(
+                @"(?<map_name>[a-zA-Z'\s+-]*)\s*(?<instance_number>[123]?)\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)\s*(?<mark_name>[\w+ +-]+)",
+                RegexOptions.Compiled);
+            // For the format "Raiden [S]: Gamma - Yanxia ( 23.6, 11.4 )"
+            var faloopRegex = new Regex(
+                @"(?<world_name>[a-zA-Z0-9'-]+)\s+\[S\]: (?<mark_name>[\w+ -]+) - (?<map_name>[\w+ ]+)\s+\(?(?<instance_number>[1-3]?)\)?\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
+                RegexOptions.Compiled);
 
             foreach (var inputLine in splitStrings)
             {
@@ -126,21 +129,31 @@ namespace CoordImporter
                 }
                 else
                 {
-                    // If a map on Bear doesn't have a mark's location then the coordinates are 'NOT AVAILABLE'
-                    if (inputLine.Contains("NOT AVAILABLE"))
+                    // If we get here then the string can be from Faloop or Bear. Easiest way to discern them is to
+                    // check if the string contains '[S]', which is unique to Faloop
+                    if (inputLine.Contains("[S]"))
                     {
-                        var unavailableMark = new SeStringBuilder();
-                        unavailableMark.Append($"Input {inputLine} does not have coordinates. Ignoring");
-                        // this.Chat.PrintChat(new XivChatEntry
-                        // {
-                        //     Type = type,
-                        //     Name = "",
-                        //     Message = unavailableMark.Build()
-                        // });
-                        continue;
+                        // We have a Faloop string
+                        match = faloopRegex.Matches(inputLine)[0];
                     }
+                    else
+                    {
+                        // If a map on Bear doesn't have a mark's location then the coordinates are 'NOT AVAILABLE'
+                        if (inputLine.Contains("NOT AVAILABLE"))
+                        {
+                            var unavailableMark = new SeStringBuilder();
+                            unavailableMark.Append($"Input {inputLine} does not have coordinates. Ignoring");
+                            // this.Chat.PrintChat(new XivChatEntry
+                            // {
+                            //     Type = type,
+                            //     Name = "",
+                            //     Message = unavailableMark.Build()
+                            // });
+                            continue;
+                        }
 
-                    match = bearRegex.Matches(inputLine)[0];
+                        match = bearRegex.Matches(inputLine)[0];
+                    }
                     groups = match.Groups;
                     // Bear doesn't use the 1/2/3 instance symbols directly (while Siren does), so for Bear
                     // use this dictionary to get the symbol for the output
@@ -154,14 +167,17 @@ namespace CoordImporter
                 var x = float.Parse(groups["x_coord"].Value);
                 // This disgusting hack is courtesy of a bug where the decimal point seems to have gotten
                 // lost in some step. I hate this and want it to be temporary but I am lazy
-                if (x > 50.0f) {
+                if (x > 50.0f)
+                {
                     x /= 10;
                 }
+
                 var y = float.Parse(groups["y_coord"].Value);
                 if (y > 50.0f)
                 {
                     y /= 10;
                 }
+
                 if (map != null)
                 {
                     output = this.CreateMapLink(map.TerritoryType.Value!.RowId, map.RowId, x, y, instanceId, markName);
