@@ -112,7 +112,7 @@ namespace CoordImporter
                 RegexOptions.Compiled);
             // For the format "Raiden [S]: Gamma - Yanxia ( 23.6, 11.4 )"
             var faloopRegex = new Regex(
-                @"(?<world_name>[a-zA-Z0-9'-]+)\s+\[S\]: (?<mark_name>[\w+ -]+) - (?<map_name>[\w+ ]+)\s+\(?(?<instance_number>[1-3]?)\)?\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
+                @"(?<world_name>[a-zA-Z0-9'-]+)\s+\[S\]: (?<mark_name>[\w+ -]+) - (?<map_name>[\w+ '-]+)\s+\(?(?<instance_number>[1-3]?)\)?\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
                 RegexOptions.Compiled);
 
             foreach (var inputLine in splitStrings)
