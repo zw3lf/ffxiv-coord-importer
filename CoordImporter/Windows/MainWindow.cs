@@ -15,7 +15,7 @@ public class MainWindow : Window, IDisposable
     {
         this.SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(100, 50),
+            MinimumSize = new Vector2(100, 65),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
 
@@ -26,14 +26,20 @@ public class MainWindow : Window, IDisposable
 
     public override void Draw()
     {
-        ImGui.Spacing();
-        ImGui.Text("Paste Coordinates:");
-        ImGui.Indent(10);
-        ImGui.InputTextMultiline("", ref textBuffer, 16384, new Vector2(250, 250), ImGuiInputTextFlags.None);
-        ImGui.Unindent(10);
-        if (ImGui.Button("Import", new Vector2(260, 32)))
+        ImGui.Spacing();        
+        if (ImGui.Button("Import", new Vector2(80, 24)))
         {
             Plugin.EchoString(textBuffer);
         }
+        ImGui.SameLine();
+        ImGui.Dummy(new Vector2(24.0f, 0.0f));
+        ImGui.SameLine();
+        if (ImGui.Button("Clean", new Vector2(80, 24)))
+        {
+            textBuffer = "";
+        }
+        ImGui.Text("Paste Coordinates:");
+        ImGui.Indent(10);
+        ImGui.InputTextMultiline("", ref textBuffer, 16384, new Vector2(250, 250), ImGuiInputTextFlags.None);
     }
 }
