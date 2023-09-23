@@ -104,7 +104,7 @@ namespace CoordImporter
                 StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             // For the format "(Maybe: Storsie) \ue0bbLabyrinthos ( 17  , 9.6 ) " (including the icky unicode instance/arrow)
             var sirenRegex = new Regex(
-                @"(\(Maybe: (?<mark_name>[\w+ -]+)\) \ue0bb)?(?<map_name>[\w+ ]+)(?<instance_id>[\ue0b1\ue0b2\ue0b3]?)\s+\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
+                @"(\(Maybe: (?<mark_name>[\w+ -'git]+)\) \ue0bb)?(?<map_name>[\w+ '-]+)(?<instance_id>[\ue0b1\ue0b2\ue0b3]?)\s+\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
                 RegexOptions.Compiled);
             // For the format "Labyrinthos ( 16.5 , 16.8 ) Storsie"
             var bearRegex = new Regex(
