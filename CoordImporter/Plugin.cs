@@ -104,7 +104,7 @@ namespace CoordImporter
                 StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             // For the format "(Maybe: Storsie) \ue0bbLabyrinthos ( 17  , 9.6 ) " (including the icky unicode instance/arrow)
             var sirenRegex = new Regex(
-                @"(\(Maybe: (?<mark_name>[\w+ -'git]+)\) \ue0bb)?(?<map_name>[\w+ '-]+)(?<instance_id>[\ue0b1\ue0b2\ue0b3]?)\s+\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
+                @"(\(Maybe: (?<mark_name>[\w+ '-]+)\) \ue0bb)?(?<map_name>[\w+ '-]+)(?<instance_id>[\ue0b1\ue0b2\ue0b3]?)\s+\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
                 RegexOptions.Compiled);
             // For the format "Labyrinthos ( 16.5 , 16.8 ) Storsie"
             var bearRegex = new Regex(
@@ -112,7 +112,7 @@ namespace CoordImporter
                 RegexOptions.Compiled);
             // For the format "Raiden [S]: Gamma - Yanxia ( 23.6, 11.4 )"
             var faloopRegex = new Regex(
-                @"(?<world_name>[a-zA-Z0-9'-]+)\s+\[S\]: (?<mark_name>[\w+ -]+) - (?<map_name>[\w+ '-]+)\s+\(?(?<instance_number>[1-3]?)\)?\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
+                @"(?<world_name>[a-zA-Z0-9'-]+)\s+\[S\]: (?<mark_name>[\w+ '-]+) - (?<map_name>[\w+ '-]+)\s+\(?(?<instance_number>[1-3]?)\)?\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
                 RegexOptions.Compiled);
 
             foreach (var inputLine in splitStrings)
