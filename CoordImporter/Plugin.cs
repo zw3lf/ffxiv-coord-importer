@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
-using Dalamud.Configuration;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using System.Text.RegularExpressions;
 using Dalamud.Data;
 using Dalamud.Game.Gui;
@@ -24,19 +24,19 @@ namespace CoordImporter
         private const string CommandName = "/ci";
 
         private DalamudPluginInterface PluginInterface { get; init; }
-        private CommandManager CommandManager { get; init; }
+        private ICommandManager CommandManager { get; init; }
         public WindowSystem WindowSystem = new("CoordinateImporter");
-        private ChatGui Chat { get; }
-        public DataManager DataManager { get; }
+        private IChatGui Chat { get; }
+        public IDataManager DataManager { get; }
         private List<Map> maps;
 
         private MainWindow MainWindow { get; init; }
 
         public Plugin(
             [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
-            [RequiredVersion("1.0")] CommandManager commandManager,
-            ChatGui chat,
-            DataManager dataManager)
+            [RequiredVersion("1.0")] ICommandManager commandManager,
+            IChatGui chat,
+            IDataManager dataManager)
         {
             this.PluginInterface = pluginInterface;
             this.CommandManager = commandManager;
@@ -180,7 +180,7 @@ namespace CoordImporter
                     output = builder.Build();
                 }
 
-                this.Chat.PrintChat(new XivChatEntry
+                this.Chat.Print(new XivChatEntry
                 {
                     Type = type,
                     Name = "",
