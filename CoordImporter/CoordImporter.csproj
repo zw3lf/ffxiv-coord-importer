@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Authors></Authors>
     <Company></Company>
-    <Version>0.0.0.8</Version>
+    <Version>0.0.0.9</Version>
     <Description>Import map coordinates to echo chat.</Description>
     <Copyright>MIT</Copyright>
     <PackageProjectUrl>https://github.com/zw3lf/ffxiv-coord-importer</PackageProjectUrl>
