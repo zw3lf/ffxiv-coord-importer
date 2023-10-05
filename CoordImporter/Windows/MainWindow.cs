@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Numerics;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
@@ -26,7 +26,7 @@ public class MainWindow : Window, IDisposable
 
     public override void Draw()
     {
-        ImGui.Spacing();        
+        ImGui.Spacing();
         if (ImGui.Button("Import", new Vector2(80, 24)))
         {
             Plugin.EchoString(textBuffer);
@@ -40,6 +40,15 @@ public class MainWindow : Window, IDisposable
         }
         ImGui.Text("Paste Coordinates:");
         ImGui.Indent(10);
-        ImGui.InputTextMultiline("", ref textBuffer, 16384, new Vector2(250, 250), ImGuiInputTextFlags.None);
+
+        Vector2 availableSpace = ImGui.GetContentRegionAvail();
+        Vector2 padding = new Vector2(10, 10);
+
+        Vector2 dynamicSize = new Vector2(
+            availableSpace.X - padding.X,
+            availableSpace.Y - padding.Y
+        );
+
+        ImGui.InputTextMultiline("", ref textBuffer, 16384, dynamicSize, ImGuiInputTextFlags.None);
     }
 }
