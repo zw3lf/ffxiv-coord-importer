@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Dalamud.Game.Command;
@@ -129,7 +130,7 @@ namespace CoordImporter
                 RegexOptions.Compiled);
             // For the format "Labyrinthos ( 16.5 , 16.8 ) Storsie"
             var bearRegex = new Regex(
-                @"(?<map_name>[\w'\s+-]*)\s*(?<instance_number>[123]?)\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)\s*(?<mark_name>[\w+ +-]+)",
+                @"(?<map_name>[\D'\s+-]*)\s*(?<instance_number>[123]?)\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)\s*(?<mark_name>[\w+ +-]+)",
                 RegexOptions.Compiled);
             // For the format "Raiden [S]: Gamma - Yanxia ( 23.6, 11.4 )"
             var faloopRegex = new Regex(
@@ -147,7 +148,7 @@ namespace CoordImporter
                 {
                     match = sirenRegex.Matches(inputLine)[0];
                     groups = match.Groups;
-                    Logger.Debug($"Siren regex matched for input {inputLine}. Groups are {this.DumpGroups(match.Groups)}");
+                    Logger.Debug($"Siren regex matched for input {inputLine}. Groups are {this.DumpGroups(groups)}");
                     instanceId = groups["instance_id"].Value;
                 }
                 else
@@ -165,32 +166,24 @@ namespace CoordImporter
                         // If a map on Bear doesn't have a mark's location then the coordinates are 'NOT AVAILABLE'
                         if (inputLine.Contains("NOT AVAILABLE"))
                         {
-                            var unavailableMark = new SeStringBuilder();
-                            unavailableMark.Append($"Input {inputLine} does not have coordinates. Ignoring");
-                            // this.Chat.PrintChat(new XivChatEntry
-                            // {
-                            //     Type = type,
-                            //     Name = "",
-                            //     Message = unavailableMark.Build()
-                            // });
+                            Logger.Debug($"Input {inputLine} does not have coordinates. Ignoring");
                             continue;
                         }
 
                         match = bearRegex.Matches(inputLine)[0];
-                        Logger.Debug($"Bear regex matched for input {inputLine}. Groups are {this.DumpGroups(match.Groups)}");
+                        groups = match.Groups;
+                        Logger.Debug($"Bear regex matched for input {inputLine}. Groups are {this.DumpGroups(groups)}");
                     }
                     groups = match.Groups;
-                    // Bear doesn't use the 1/2/3 instance symbols directly (while Siren does), so for Bear
+                    // Faloop (and Bear) doesn't use the 1/2/3 instance symbols directly (while Siren does), so 
                     // use this dictionary to get the symbol for the output
                     instanceId = groups["instance_number"].Value.IsNullOrEmpty()
                                      ? null
                                      : instanceKeyMap[groups["instance_number"].Value];
                 }
                 Map? map = null;
-                if (maps.ContainsKey(groups["map_name"].Value.Trim()))
-                {
-                    map = maps[groups["map_name"].Value.Trim()];
-                }
+                var mapName = groups["map_name"].Value.Trim();
+                maps.TryGetValue(mapName, out map);
                 var markName = groups["mark_name"].Value;
                 var x = float.Parse(groups["x_coord"].Value, CultureInfo.InvariantCulture);
                 var y = float.Parse(groups["y_coord"].Value, CultureInfo.InvariantCulture);
