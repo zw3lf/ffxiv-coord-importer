@@ -7,7 +7,7 @@ namespace CoordImporter.Windows;
 
 public class MainWindow : Window, IDisposable
 {
-    private Plugin Plugin;
+    private readonly Plugin plugin;
     private string textBuffer = new String("");
 
     public MainWindow(Plugin plugin) : base(
@@ -19,7 +19,7 @@ public class MainWindow : Window, IDisposable
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
 
-        this.Plugin = plugin;
+        this.plugin = plugin;
     }
 
     public void Dispose() { }
@@ -29,7 +29,7 @@ public class MainWindow : Window, IDisposable
         ImGui.Spacing();
         if (ImGui.Button("Import", new Vector2(80, 24)))
         {
-            Plugin.EchoString(textBuffer);
+            plugin.EchoString(textBuffer);
         }
         ImGui.SameLine();
         ImGui.Dummy(new Vector2(24.0f, 0.0f));

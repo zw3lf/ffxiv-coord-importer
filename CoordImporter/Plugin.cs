@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
@@ -15,6 +17,7 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Utility;
 using Lumina.Excel.GeneratedSheets;
 using CoordImporter.Windows;
+using Dalamud;
 
 namespace CoordImporter
 {
@@ -25,10 +28,11 @@ namespace CoordImporter
 
         private DalamudPluginInterface PluginInterface { get; init; }
         private ICommandManager CommandManager { get; init; }
-        public WindowSystem WindowSystem = new("CoordinateImporter");
+        private WindowSystem WindowSystem = new("CoordinateImporter");
         private IChatGui Chat { get; }
-        public IDataManager DataManager { get; }
-        private List<Map> maps;
+        private IDataManager DataManager { get; }
+        private IPluginLog Logger { get; }
+        private IDictionary<String, Map> maps { get; set; }
 
         private MainWindow MainWindow { get; init; }
 
@@ -36,27 +40,44 @@ namespace CoordImporter
             [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
             [RequiredVersion("1.0")] ICommandManager commandManager,
             IChatGui chat,
-            IDataManager dataManager)
+            IDataManager dataManager,
+            IPluginLog logger)
         {
             this.PluginInterface = pluginInterface;
             this.CommandManager = commandManager;
             this.Chat = chat;
             this.DataManager = dataManager;
+            this.Logger = logger;
 
-            // A nice little bit of jank
-            // Dalamud has all the map data indexed by ID. We want it by name. So let's make a local copy of that
-            // list for us to traverse each time we want to find a map name. Linear search and all that. 
-            maps = new List<Map>();
-            if (DataManager.GetExcelSheet<Map>() != null)
+            // This should support names of maps in all available languages
+            // We create a hashtable where the key is the name of the map (in whatever language) and the value is the map object
+            maps = new Dictionary<String, Map>();
+            foreach (ClientLanguage cl in ClientLanguage.GetValuesAsUnderlyingType<ClientLanguage>())
             {
-                for (uint i = 0; i < DataManager.GetExcelSheet<Map>()!.RowCount; i++)
+                if (DataManager.GetExcelSheet<Map>(cl) != null)
                 {
-                    var map = DataManager.GetExcelSheet<Map>()!.GetRow(i);
-                    if (map != null)
+                    for (uint i = 0; i < DataManager.GetExcelSheet<Map>(cl)!.RowCount; i++)
                     {
-                        maps.Add(map);
+                        var placeNameSheet = DataManager.GetExcelSheet<PlaceName>(cl);
+                        if (placeNameSheet != null)
+                        {
+                            var map = DataManager.GetExcelSheet<Map>(cl)!.GetRow(i);
+                            if (map != null)
+                            {
+                                var placeName = placeNameSheet.GetRow(map.PlaceName.Row);
+                                if (placeName != null)
+                                {
+                                    Logger.Verbose($"Adding map with name {placeName.Name} with language {cl}");
+                                    if (!maps.TryAdd(placeName.Name, map))
+                                    {
+                                        Logger.Verbose($"Attempted to add map with name {placeName.Name} for language {cl} but it already existed");
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
+                Logger.Debug($"Loaded Map data from ClientLanguage {cl}");
             }
 
             MainWindow = new MainWindow(this);
@@ -108,7 +129,7 @@ namespace CoordImporter
                 RegexOptions.Compiled);
             // For the format "Labyrinthos ( 16.5 , 16.8 ) Storsie"
             var bearRegex = new Regex(
-                @"(?<map_name>[a-zA-Z'\s+-]*)\s*(?<instance_number>[123]?)\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)\s*(?<mark_name>[\w+ +-]+)",
+                @"(?<map_name>[\w'\s+-]*)\s*(?<instance_number>[123]?)\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)\s*(?<mark_name>[\w+ +-]+)",
                 RegexOptions.Compiled);
             // For the format "Raiden [S]: Gamma - Yanxia ( 23.6, 11.4 )"
             var faloopRegex = new Regex(
@@ -126,6 +147,7 @@ namespace CoordImporter
                 {
                     match = sirenRegex.Matches(inputLine)[0];
                     groups = match.Groups;
+                    Logger.Debug($"Siren regex matched for input {inputLine}. Groups are {this.DumpGroups(match.Groups)}");
                     instanceId = groups["instance_id"].Value;
                 }
                 else
@@ -136,6 +158,7 @@ namespace CoordImporter
                     {
                         // We have a Faloop string
                         match = faloopRegex.Matches(inputLine)[0];
+                        Logger.Debug($"Faloop regex matched for input {inputLine}. Groups are {this.DumpGroups(match.Groups)}");
                     }
                     else
                     {
@@ -154,6 +177,7 @@ namespace CoordImporter
                         }
 
                         match = bearRegex.Matches(inputLine)[0];
+                        Logger.Debug($"Bear regex matched for input {inputLine}. Groups are {this.DumpGroups(match.Groups)}");
                     }
                     groups = match.Groups;
                     // Bear doesn't use the 1/2/3 instance symbols directly (while Siren does), so for Bear
@@ -162,8 +186,11 @@ namespace CoordImporter
                                      ? null
                                      : instanceKeyMap[groups["instance_number"].Value];
                 }
-
-                Map? map = FindMapIdByName(groups["map_name"].Value.Trim());
+                Map? map = null;
+                if (maps.ContainsKey(groups["map_name"].Value.Trim()))
+                {
+                    map = maps[groups["map_name"].Value.Trim()];
+                }
                 var markName = groups["mark_name"].Value;
                 var x = float.Parse(groups["x_coord"].Value, CultureInfo.InvariantCulture);
                 var y = float.Parse(groups["y_coord"].Value, CultureInfo.InvariantCulture);
@@ -187,22 +214,6 @@ namespace CoordImporter
                     Message = output
                 });
             }
-        }
-
-        private Map? FindMapIdByName(string name)
-        {
-            foreach (Map map in maps)
-            {
-                if (map.PlaceName.Value != null)
-                {
-                    if (name == map.PlaceName.Value!.Name)
-                    {
-                        return map;
-                    }
-                }
-            }
-
-            return null;
         }
 
         // This is a custom version of Dalamud's CreateMapLink method. It includes the mark name and the instance ID
@@ -234,6 +245,17 @@ namespace CoordImporter
             });
             payloads.InsertRange(1, SeString.TextArrowPayloads);
             return new SeString(payloads);
+        }
+
+        private String DumpGroups(GroupCollection groups)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (Group group in groups)
+            {
+                sb.Append($"({group.Name}:{group.Value}),");
+            }
+            sb.Remove(sb.Length - 1, 1);
+            return sb.ToString();
         }
     }
 }
