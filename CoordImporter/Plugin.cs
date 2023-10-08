@@ -1,22 +1,11 @@
 ﻿using CoordImporter.Managers;
-using CoordImporter.Parser;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
+using CoordImporter.Windows;
 using Dalamud.Game.Command;
+using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using System.Text.RegularExpressions;
-using Dalamud.Game.Text;
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Interface.Windowing;
-using Dalamud.Utility;
 using Lumina.Excel.GeneratedSheets;
-using CoordImporter.Windows;
-using Dalamud;
 
 namespace CoordImporter
 {
