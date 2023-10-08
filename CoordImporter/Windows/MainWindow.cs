@@ -5,7 +5,7 @@ using ImGuiNET;
 
 namespace CoordImporter.Windows;
 
-public class MainWindow : Window, IDisposable
+public sealed class MainWindow : Window, IDisposable
 {
     private readonly Plugin plugin;
     private string textBuffer = new String("");
@@ -15,7 +15,7 @@ public class MainWindow : Window, IDisposable
     {
         this.SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(100, 65),
+            MinimumSize = new Vector2(100, 85),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
 
@@ -29,7 +29,7 @@ public class MainWindow : Window, IDisposable
         ImGui.Spacing();
         if (ImGui.Button("Import", new Vector2(80, 24)))
         {
-            plugin.EchoString(textBuffer);
+            plugin.ParseAndEcho(textBuffer);
         }
         ImGui.SameLine();
         ImGui.Dummy(new Vector2(24.0f, 0.0f));
