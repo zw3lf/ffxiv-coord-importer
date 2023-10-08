@@ -8,6 +8,16 @@
         "resolved": "3.2.0",
         "contentHash": "xjY8xBigSeWIYs4I7DgUHqSNoGqnHi7Fv7/7RZD02rvZyG3hlsjnQKiVKVWKgr9kRKgmV+dEfu8KScvysiC0Wg=="
       },
+      "Lib.Harmony": {
+        "type": "Direct",
+        "requested": "[2.3.0-prerelease.2, )",
+        "resolved": "2.3.0-prerelease.2",
+        "contentHash": "96ijLrds6W9otxxKIopzQS68tAm6sFbfWBSxfnxkWb9QmE84NJJH/6mutr8sqQ+Dv5Oqg6fAZBdcM6WfB6khVA==",
+        "dependencies": {
+          "MonoMod.Core": "1.0.0-prerelease.2",
+          "System.Text.Json": "5.0.2"
+        }
+      },
       "Microsoft.NET.Test.Sdk": {
         "type": "Direct",
         "requested": "[17.7.1, )",
@@ -18,11 +28,11 @@
           "Microsoft.TestPlatform.TestHost": "17.7.1"
         }
       },
-      "Moq": {
+      "NSubstitute": {
         "type": "Direct",
-        "requested": "[4.20.69, )",
-        "resolved": "4.20.69",
-        "contentHash": "8P/oAUOL8ZVyXnzBBcgdhTsOD1kQbAWfOcMI7KDQO3HqQtzB/0WYLdnMa4Jefv8nu/MQYiiG0IuoJdvG0v0Nig==",
+        "requested": "[5.1.0, )",
+        "resolved": "5.1.0",
+        "contentHash": "ZCqOP3Kpp2ea7QcLyjMU4wzE+0wmrMN35PQMsdPOHYc2IrvjmusG9hICOiqiOTPKN0gJon6wyCn6ZuGHdNs9hQ==",
         "dependencies": {
           "Castle.Core": "5.1.1"
         }
@@ -89,6 +99,45 @@
           "Newtonsoft.Json": "13.0.1"
         }
       },
+      "Mono.Cecil": {
+        "type": "Transitive",
+        "resolved": "0.11.4",
+        "contentHash": "IC1h5g0NeJGHIUgzM1P82ld57knhP0IcQfrYITDPXlNpMYGUrsG5TxuaWTjaeqDNQMBDNZkB8L0rBnwsY6JHuQ=="
+      },
+      "MonoMod.Backports": {
+        "type": "Transitive",
+        "resolved": "1.0.0-prerelease.2",
+        "contentHash": "x7ap9fLFhLllTNorvWt8IuVP4NwH3+qfpO/AmoTM/Fcq11DgTyo0up+udsMFdw2nCpxh1//xmVydpac96ulqlg==",
+        "dependencies": {
+          "MonoMod.ILHelpers": "1.0.0-prerelease.2"
+        }
+      },
+      "MonoMod.Core": {
+        "type": "Transitive",
+        "resolved": "1.0.0-prerelease.2",
+        "contentHash": "nQYYvooFTMfH7KljHXg1eHCm5CpCmYgJTTdEMVgkhKOdfco/Gw9h/KYC1EXOMNjQdmi/hwcFP5PgF7W6XWVMRg==",
+        "dependencies": {
+          "Mono.Cecil": "0.11.4",
+          "MonoMod.Backports": "1.0.0-prerelease.2",
+          "MonoMod.ILHelpers": "1.0.0-prerelease.2",
+          "MonoMod.Utils": "25.0.0-prerelease.2"
+        }
+      },
+      "MonoMod.ILHelpers": {
+        "type": "Transitive",
+        "resolved": "1.0.0-prerelease.2",
+        "contentHash": "jB1JpcLGtKsWFIPItn/eQgmKwzPBKoDJnnBRDxWV3Ma4am6wPx8ynXXTwoTZOFi5gfHvkqK0RIu9MwJbwRCmow=="
+      },
+      "MonoMod.Utils": {
+        "type": "Transitive",
+        "resolved": "25.0.0-prerelease.2",
+        "contentHash": "8NWKe2Kc/CIt8BpK+DcZnc+23XP5+LG+nuUP8ELQ32qxad1JOBjLMRmCXLfxpk74z37XuBpTJUABa9pwPY2MXg==",
+        "dependencies": {
+          "Mono.Cecil": "0.11.4",
+          "MonoMod.Backports": "1.0.0-prerelease.2",
+          "MonoMod.ILHelpers": "1.0.0-prerelease.2"
+        }
+      },
       "NETStandard.Library": {
         "type": "Transitive",
         "resolved": "2.0.0",
@@ -116,6 +165,11 @@
         "type": "Transitive",
         "resolved": "1.6.0",
         "contentHash": "COC1aiAJjCoA5GBF+QKL2uLqEBew4JsCkQmoHKbN3TlOZKa2fKLz5CpiRQKDz0RsAOEGsVKqOD5bomsXq/4STQ=="
+      },
+      "System.Text.Json": {
+        "type": "Transitive",
+        "resolved": "5.0.2",
+        "contentHash": "I47dVIGiV6SfAyppphxqupertT/5oZkYLDCX6vC3HpOI4ZLjyoKAreUoem2ie6G0RbRuFrlqz/PcTQjfb2DOfQ=="
       },
       "coordimporter": {
         "type": "Project",
