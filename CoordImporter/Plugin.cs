@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using Dalamud.Game.Command;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using System.Text.RegularExpressions;
-using Dalamud.Data;
-using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -78,9 +74,10 @@ namespace CoordImporter
                         }
                     }
                 }
-                Logger.Debug($"Loaded Map data from ClientLanguage {cl}");
             }
-
+            // Invalidate the Placename cache because the sheet in here may not correspond to the correct ClientLanguage.
+            // This is because Lumina caches the sheets but it doesn't seem to properly manage the language as part of the caching
+            DataManager.Excel.RemoveSheetFromCache<PlaceName>();
             MainWindow = new MainWindow(this);
 
             WindowSystem.AddWindow(MainWindow);
@@ -181,16 +178,15 @@ namespace CoordImporter
                                      ? null
                                      : instanceKeyMap[groups["instance_number"].Value];
                 }
-                Map? map = null;
                 var mapName = groups["map_name"].Value.Trim();
-                maps.TryGetValue(mapName, out map);
+                maps.TryGetValue(mapName, out var map);
                 var markName = groups["mark_name"].Value;
                 var x = float.Parse(groups["x_coord"].Value, CultureInfo.InvariantCulture);
                 var y = float.Parse(groups["y_coord"].Value, CultureInfo.InvariantCulture);
 
                 if (map != null)
                 {
-                    output = this.CreateMapLink(map.TerritoryType.Value!.RowId, map.RowId, x, y, instanceId, markName);
+                    output = CreateMapLink(map.TerritoryType.Value!.RowId, map.RowId, x, y, instanceId, markName);
                 }
                 else
                 {
