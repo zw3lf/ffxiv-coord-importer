@@ -1,3 +1,4 @@
+using Dalamud.Interface.Utility;
 using System;
 using System.Numerics;
 using Dalamud.Interface.Windowing;
@@ -27,28 +28,23 @@ public class MainWindow : Window, IDisposable
     public override void Draw()
     {
         ImGui.Spacing();
-        if (ImGui.Button("Import", new Vector2(80, 24)))
+        if (ImGui.Button("Import"))
         {
             plugin.EchoString(textBuffer);
         }
         ImGui.SameLine();
-        ImGui.Dummy(new Vector2(24.0f, 0.0f));
+        ImGui.Dummy(new Vector2(10, 0)*ImGuiHelpers.GlobalScale);
         ImGui.SameLine();
-        if (ImGui.Button("Clean", new Vector2(80, 24)))
+        if (ImGui.Button("Clean"))
         {
             textBuffer = "";
         }
         ImGui.Text("Paste Coordinates:");
-        ImGui.Indent(10);
 
-        Vector2 availableSpace = ImGui.GetContentRegionAvail();
         Vector2 padding = new Vector2(10, 10);
+        ImGui.Indent(padding.X);
+        Vector2 availableSpace = ImGui.GetContentRegionAvail();
 
-        Vector2 dynamicSize = new Vector2(
-            availableSpace.X - padding.X,
-            availableSpace.Y - padding.Y
-        );
-
-        ImGui.InputTextMultiline("", ref textBuffer, 16384, dynamicSize, ImGuiInputTextFlags.None);
+        ImGui.InputTextMultiline("", ref textBuffer, 16384, availableSpace - padding, ImGuiInputTextFlags.None);
     }
 }
