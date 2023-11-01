@@ -14,6 +14,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 using Dalamud.Interface.Windowing;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 
 namespace CoordImporter.Windows;
@@ -27,7 +28,7 @@ public class MainWindow : Window, IDisposable
     {
         this.SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(100, 65)*ImGuiHelpers.GlobalScale,
+            MinimumSize = new Vector2(100, 65) * ImGuiHelpers.GlobalScale,
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
 
@@ -38,6 +39,7 @@ public class MainWindow : Window, IDisposable
 
     public override void Draw()
     {
+        var windowSize = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin();
         ImGui.Spacing();
         if (ImGui.Button("Import"))
         {
@@ -52,9 +54,9 @@ public class MainWindow : Window, IDisposable
         {
             ImGui.SetTooltip("Import to Hunt Helper");
         }
-        
+
         ImGui.SameLine();
-        ImGui.Dummy(new Vector2(24.0f, 0.0f));
+        ImGui.Dummy(new Vector2(float.Max(windowSize.X - 2.5f * ImGuiHelpers.GetButtonSize("Clean").X, 50.0f * ImGuiHelpers.GlobalScale), 0.0f));
         ImGui.SameLine();
         if (ImGui.Button("Clean"))
         {
@@ -63,7 +65,7 @@ public class MainWindow : Window, IDisposable
         ImGui.Text("Paste Coordinates:");
 
         Vector2 padding = new Vector2(10, 10);
-        ImGui.Indent(padding.X);
+        ImGuiHelpers.ScaledIndent(padding.X);
         Vector2 availableSpace = ImGui.GetContentRegionAvail();
 
         ImGui.InputTextMultiline("", ref textBuffer, 16384, availableSpace - padding, ImGuiInputTextFlags.None);
