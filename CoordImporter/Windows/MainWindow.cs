@@ -7,11 +7,14 @@ using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
+using Dalamud.Interface.Utility;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
+using Dalamud.Interface.Windowing;
+using ImGuiNET;
 
 namespace CoordImporter.Windows;
 
@@ -24,7 +27,7 @@ public class MainWindow : Window, IDisposable
     {
         this.SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(100, 65),
+            MinimumSize = new Vector2(100, 65)*ImGuiHelpers.GlobalScale,
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
 
@@ -36,7 +39,7 @@ public class MainWindow : Window, IDisposable
     public override void Draw()
     {
         ImGui.Spacing();
-        if (ImGui.Button("Import", new Vector2(80, 24)))
+        if (ImGui.Button("Import"))
         {
             PerformImport(textBuffer);
         }
@@ -53,22 +56,17 @@ public class MainWindow : Window, IDisposable
         ImGui.SameLine();
         ImGui.Dummy(new Vector2(24.0f, 0.0f));
         ImGui.SameLine();
-        if (ImGui.Button("Clean", new Vector2(80, 24)))
+        if (ImGui.Button("Clean"))
         {
             textBuffer = "";
         }
         ImGui.Text("Paste Coordinates:");
-        ImGui.Indent(10);
 
-        Vector2 availableSpace = ImGui.GetContentRegionAvail();
         Vector2 padding = new Vector2(10, 10);
+        ImGui.Indent(padding.X);
+        Vector2 availableSpace = ImGui.GetContentRegionAvail();
 
-        Vector2 dynamicSize = new Vector2(
-            availableSpace.X - padding.X,
-            availableSpace.Y - padding.Y
-        );
-
-        ImGui.InputTextMultiline("", ref textBuffer, 16384, dynamicSize, ImGuiInputTextFlags.None);
+        ImGui.InputTextMultiline("", ref textBuffer, 16384, availableSpace - padding, ImGuiInputTextFlags.None);
     }
 
     private void PerformImport(string payload)
