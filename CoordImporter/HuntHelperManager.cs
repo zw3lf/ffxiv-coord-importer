@@ -98,14 +98,14 @@ public class HuntHelperManager : IDisposable {
         catch (IpcNotReadyError e)
         {
             Plugin.Logger.Warning(
-                "Hunt Helper appears to have disappeared ;-;. Can't get the train data ;-;. Disabling support until it comes back."
+                "Hunt Helper appears to have disappeared ;-;. Can't complete the operation ;-;. Disabling support until it comes back."
             );
             Available = false;
             return "Hunt Helper has disappeared from my sight ;-;";
         }
         catch (IpcError e)
         {
-            const string message = "Hmm...something unexpected happened while retrieving train data from Hunt Helper :T";
+            const string message = "Hmm...something unexpected happened communicating with Hunt Helper :T";
             Plugin.Logger.Error(e, message);
             return message;
         }
@@ -120,10 +120,10 @@ public class HuntHelperManager : IDisposable {
             0,
             markData.TerritoryId,
             markData.MapId,
-            markData.Instance,
+            markData.Instance ?? 0,
             markData.Position,
             false,
-            DateTime.Now
+            DateTime.Now.ToUniversalTime()
         );
     }
 
@@ -132,7 +132,7 @@ public class HuntHelperManager : IDisposable {
         uint MobId,
         uint TerritoryId,
         uint MapId,
-        uint? Instance,
+        uint Instance,
         Vector2 Position,
         bool Dead,
         DateTime LastSeenUtc

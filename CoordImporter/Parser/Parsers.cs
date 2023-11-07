@@ -3,6 +3,7 @@ using Dalamud;
 using Dalamud.Game.Text;
 using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
+using Serilog.Events;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -52,7 +53,11 @@ public interface ITrackerParser
 
     static IDictionary<string, MapData> MapDataByName
     {
-        get => _mapDataByName ??= LoadMapData();
+        get
+        {
+            _mapDataByName ??= LoadMapData();
+            return _mapDataByName;
+        }
     }
 
     private static IDictionary<string, MapData> LoadMapData()
@@ -64,15 +69,22 @@ public interface ITrackerParser
             var clientLanguages = (Enum.GetValuesAsUnderlyingType<ClientLanguage>() as ClientLanguage[])!;
             foreach (var clientLanguage in clientLanguages)
             {
-                var mapSheet = Plugin.DataManager.GetExcelSheet<Map>(clientLanguage);
-                if (mapSheet == null) continue;
+                Plugin.Logger.Verbose($"Loading map data for language: {clientLanguage}");
+                var territorySheet = Plugin.DataManager.GetExcelSheet<TerritoryType>(clientLanguage);
+                var placeSheet = Plugin.DataManager.GetExcelSheet<PlaceName>(clientLanguage);
+                if (territorySheet == null || placeSheet == null) continue;
 
-                foreach (var map in mapSheet)
+                foreach (var territory in territorySheet)
                 {
-                    if (!map.PlaceName.IsValueCreated) continue;
-
-                    var placeName = map.PlaceName.Value!.Name.ToString();
-                    var mapData = new MapData(map.TerritoryType.Value!.RowId, map.RowId);
+                    var placeNameValue = placeSheet.GetRow(territory.PlaceName.Row);
+                    if (placeNameValue == null)
+                    {
+                        Plugin.Logger.Verbose("Failed to load PlaceName");
+                        continue;
+                    }
+                    var placeName = placeNameValue.Name.ToString();
+                    
+                    var mapData = new MapData(territory.RowId, territory.Map.Row);
 
                     Plugin.Logger.Verbose($"Adding map with name {placeName} with language {clientLanguage}");
                     if (!mapDict.TryAdd(placeName, mapData))
@@ -83,6 +95,16 @@ public interface ITrackerParser
             }
 
             return mapDict.ToImmutableDictionary();
+    }
+
+    public static void LogParse(string tracker, string inputLine, GroupCollection groups)
+    {
+        Plugin.Logger.Debug(
+            "{0} regex matched for input {1}. Groups are {2}",
+            tracker,
+            inputLine,
+            groups.Dump()
+        );
     }
 
     bool CanParseLine(string inputLine);
@@ -106,7 +128,7 @@ public class SirenParser : ITrackerParser
     public Result<MarkData, string> Parse(string inputLine)
     {
         var groups = SirenRegex.Matches(inputLine).First().Groups;
-        Plugin.Logger.Debug( "Siren regex matched for input {0}. Groups are {1}", inputLine, () => groups.Dump());
+        ITrackerParser.LogParse("Siren", inputLine, groups);
         return groups.CreateMark(instance => (uint)(instance.First() - I1Char) + 1);
     }
 }
@@ -123,7 +145,7 @@ public class FaloopParser : ITrackerParser
     public Result<MarkData, string> Parse(string inputLine)
     {
         var groups = FaloopRegex.Matches(inputLine).First().Groups;
-        Plugin.Logger.Debug( "Faloop regex matched for input {0}. Groups are {1}", inputLine, () => groups.Dump());
+        ITrackerParser.LogParse("Faloop", inputLine, groups);
         return groups.CreateMark(instance => (uint)(instance.First() - '0'));
     }
 }
@@ -140,7 +162,7 @@ public class BearParser : ITrackerParser
     public Result<MarkData, string> Parse(string inputLine)
     {
         var groups = BearRegex.Matches(inputLine).First().Groups;
-        Plugin.Logger.Debug( "Bear regex matched for input {0}. Groups are {1}", inputLine, () => groups.Dump());
+        ITrackerParser.LogParse("Bear", inputLine, groups);
         return groups.CreateMark(instance => (uint)(instance.First() - '0'));
     }
 }

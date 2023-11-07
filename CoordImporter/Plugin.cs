@@ -29,6 +29,8 @@ namespace CoordImporter
         public static IChatGui Chat { get; private set; } = null!;
         public static IDataManager DataManager { get; private set; } = null!;
         public static IPluginLog Logger { get; private set; } = null!;
+        
+        private HuntHelperManager HuntHelperManager { get; init; }
 
         private MainWindow MainWindow { get; init; }
 
@@ -45,10 +47,12 @@ namespace CoordImporter
             DataManager = dataManager;
             Logger = logger;
 
+            HuntHelperManager = new HuntHelperManager();
+
             // Invalidate the Placename cache because the sheet in here may not correspond to the correct ClientLanguage.
             // This is because Lumina caches the sheets but it doesn't seem to properly manage the language as part of the caching
             DataManager.Excel.RemoveSheetFromCache<PlaceName>();
-            MainWindow = new MainWindow();
+            MainWindow = new MainWindow(HuntHelperManager);
 
             WindowSystem.AddWindow(MainWindow);
 

@@ -3,6 +3,7 @@ using CSharpFunctionalExtensions;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface;
+using Dalamud.Interface.Components;
 using System;
 using System.Numerics;
 using Dalamud.Interface.Windowing;
@@ -16,14 +17,17 @@ namespace CoordImporter.Windows;
 public class MainWindow : Window, IDisposable
 {
     private string textBuffer = string.Empty;
+    private HuntHelperManager huntHelperManager;
 
-    public MainWindow() : base("Coordinate Importer")
+    public MainWindow(HuntHelperManager huntHelperManager) : base("Coordinate Importer")
     {
         this.SizeConstraints = new WindowSizeConstraints
         {
             MinimumSize = new Vector2(100, 65),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
+
+        this.huntHelperManager = huntHelperManager;
     }
 
     public void Dispose() { }
@@ -36,7 +40,7 @@ public class MainWindow : Window, IDisposable
             PerformImport(textBuffer);
         }
         ImGui.SameLine();
-        if (ImGui.Button(FontAwesomeIcon.ArrowUpFromBracket.ToString()))
+        if (ImGuiComponents.IconButton(FontAwesomeIcon.ArrowUpFromBracket))
         {
             ImportToHuntHelper(textBuffer);
         }
@@ -88,6 +92,12 @@ public class MainWindow : Window, IDisposable
             ))
             .Choose()
             .ToImmutableList();
+        
+        Plugin.Logger.Debug(string.Join(", ", marks));
+
+        huntHelperManager
+            .ImportTrainList(marks)
+            .Execute(error => Plugin.Chat.PrintError(error));
     }
     
     // This is a custom version of Dalamud's CreateMapLink method. It includes the mark name and the instance ID
