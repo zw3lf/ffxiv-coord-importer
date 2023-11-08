@@ -45,6 +45,11 @@ public class MainWindow : Window, IDisposable
         {
             ImportToHuntHelper(textBuffer);
         }
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Import to Hunt Helper");
+        }
+        
         ImGui.SameLine();
         ImGui.Dummy(new Vector2(24.0f, 0.0f));
         ImGui.SameLine();
