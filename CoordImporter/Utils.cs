@@ -1,17 +1,31 @@
-﻿using Dalamud.Game.Text;
+﻿using CSharpFunctionalExtensions;
+using Dalamud.Game.Text;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CoordImporter;
 
 public static class Utils
 {
-    public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
+    public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Action<T> action)
     {
-        foreach (var value in source)
+        var values = source.ToList();
+        foreach (var value in values)
         {
             action.Invoke(value);
         }
+        return values;
+    }
+    
+    public static IEnumerable<T> Flatten<T>(this IEnumerable<IEnumerable<T>> source) =>
+        source.SelectMany(values => values);
+
+    public static Maybe<T> AsMaybe<T>(this T? value, Action emptyAction)
+    {
+        Maybe<T> maybeVal = Maybe.From(value)!;
+        maybeVal.ExecuteNoValue(emptyAction);
+        return maybeVal;
     }
 
     public static string AsInstanceIcon(this uint? instance) =>

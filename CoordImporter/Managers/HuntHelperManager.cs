@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-namespace CoordImporter;
+namespace CoordImporter.Managers;
 
 public class HuntHelperManager : IDisposable {
 
@@ -79,7 +79,12 @@ public class HuntHelperManager : IDisposable {
     public Maybe<string> ImportTrainList(IEnumerable<MarkData> marks)
     {
         return ExecuteIpcAction(() => cgImportTrainList
-            .InvokeAction(marks.Select(ToTrainMark).ToList())
+            .InvokeAction(
+                marks
+                    .Select(ToTrainMark)
+                    .Choose()
+                    .ToList()
+            )
         );
     }
 
@@ -113,18 +118,25 @@ public class HuntHelperManager : IDisposable {
         return Maybe.None;
     }
 
-    private static TrainMark ToTrainMark(MarkData markData)
+    private static Maybe<TrainMark> ToTrainMark(MarkData markData)
     {
-        return new TrainMark(
-            markData.MarkName,
-            0,
-            markData.TerritoryId,
-            markData.MapId,
-            markData.Instance ?? 0,
-            markData.Position,
-            false,
-            DateTime.Now.ToUniversalTime()
-        );
+        return Plugin
+            .DataManager.GetMobIdByName(markData.MarkName)
+            .AsMaybe(() =>
+            {
+                Plugin.Logger.Warning("Could not find MobId for hunt mark: {0}", markData.MarkName);
+                Plugin.Chat.PrintError($"Skipping mark [{markData.MarkName}] -- could not find its MobId ;-;");
+            })
+            .Select(mobId => new TrainMark(
+                markData.MarkName,
+                (uint)mobId!,
+                markData.TerritoryId,
+                markData.MapId,
+                markData.Instance ?? 0,
+                markData.Position,
+                false,
+                DateTime.Now.ToUniversalTime()
+            ));
     }
 
     private record struct TrainMark(

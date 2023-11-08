@@ -1,16 +1,17 @@
+using CoordImporter.Managers;
 using CoordImporter.Parser;
 using CSharpFunctionalExtensions;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface;
 using Dalamud.Interface.Components;
-using System;
-using System.Numerics;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Numerics;
 
 namespace CoordImporter.Windows;
 

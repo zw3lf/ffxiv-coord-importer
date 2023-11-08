@@ -1,12 +1,7 @@
-﻿using CSharpFunctionalExtensions;
-using Dalamud;
+﻿using CoordImporter.Managers;
+using CSharpFunctionalExtensions;
 using Dalamud.Game.Text;
-using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets;
-using Serilog.Events;
 using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
@@ -30,7 +25,7 @@ internal static class ParsingExtensions
     public static Result<MarkData, string> CreateMark(this GroupCollection groups, Func<string,uint> instanceParser)
     {
         var mapName = groups["map_name"].Value.Trim();
-        if (!ITrackerParser.MapDataByName.TryGetValue(mapName, out var map))
+        if (!Plugin.DataManager.GetMapDataByName().TryGetValue(mapName, out var map))
         {
             return $"Failed to find a map with name: {mapName}";
         }
@@ -49,54 +44,6 @@ internal static class ParsingExtensions
 
 public interface ITrackerParser
 {
-    private static IDictionary<string, MapData>? _mapDataByName;
-
-    static IDictionary<string, MapData> MapDataByName
-    {
-        get
-        {
-            _mapDataByName ??= LoadMapData();
-            return _mapDataByName;
-        }
-    }
-
-    private static IDictionary<string, MapData> LoadMapData()
-    {
-            // This should support names of maps in all available languages. We create a dictionary where the key is the
-            // name of the map (in whatever language) and the value is the map data we care about.
-            var mapDict = new Dictionary<string, MapData>();
-            
-            var clientLanguages = (Enum.GetValuesAsUnderlyingType<ClientLanguage>() as ClientLanguage[])!;
-            foreach (var clientLanguage in clientLanguages)
-            {
-                Plugin.Logger.Verbose($"Loading map data for language: {clientLanguage}");
-                var territorySheet = Plugin.DataManager.GetExcelSheet<TerritoryType>(clientLanguage);
-                var placeSheet = Plugin.DataManager.GetExcelSheet<PlaceName>(clientLanguage);
-                if (territorySheet == null || placeSheet == null) continue;
-
-                foreach (var territory in territorySheet)
-                {
-                    var placeNameValue = placeSheet.GetRow(territory.PlaceName.Row);
-                    if (placeNameValue == null)
-                    {
-                        Plugin.Logger.Verbose("Failed to load PlaceName");
-                        continue;
-                    }
-                    var placeName = placeNameValue.Name.ToString();
-                    
-                    var mapData = new MapData(territory.RowId, territory.Map.Row);
-
-                    Plugin.Logger.Verbose($"Adding map with name {placeName} with language {clientLanguage}");
-                    if (!mapDict.TryAdd(placeName, mapData))
-                    {
-                        Plugin.Logger.Verbose($"Attempted to add map with name {placeName} for language {clientLanguage} but it already existed");
-                    }
-                }
-            }
-
-            return mapDict.ToImmutableDictionary();
-    }
-
     public static void LogParse(string tracker, string inputLine, GroupCollection groups)
     {
         Plugin.Logger.Debug(
