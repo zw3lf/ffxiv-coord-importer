@@ -1,22 +1,11 @@
 ﻿using CoordImporter.Managers;
-using CoordImporter.Parser;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
+using CoordImporter.Windows;
 using Dalamud.Game.Command;
+using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using System.Text.RegularExpressions;
-using Dalamud.Game.Text;
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
-using Dalamud.Interface.Windowing;
-using Dalamud.Utility;
 using Lumina.Excel.GeneratedSheets;
-using CoordImporter.Windows;
-using Dalamud;
 
 namespace CoordImporter
 {
@@ -25,12 +14,13 @@ namespace CoordImporter
         public string Name => "Coordinate Importer";
         private const string CommandName = "/ci";
 
-        public static DalamudPluginInterface PluginInterface { get; private set; }
+        public static DalamudPluginInterface PluginInterface { get; set; } = null!;
+        public static IChatGui Chat { get; set; } = null!;
+        public static IPluginLog Logger { get; set; } = null!;
+        public static IDataManagerManager DataManagerManager { get; set; } = null!;
+
         private ICommandManager CommandManager { get; init; }
         private WindowSystem WindowSystem { get; } = new WindowSystem("CoordinateImporter");
-        public static IChatGui Chat { get; private set; } = null!;
-        public static IDataManager DataManager { get; private set; } = null!;
-        public static IPluginLog Logger { get; private set; } = null!;
         
         private HuntHelperManager HuntHelperManager { get; init; }
 
@@ -46,14 +36,14 @@ namespace CoordImporter
             PluginInterface = pluginInterface;
             this.CommandManager = commandManager;
             Chat = chat;
-            DataManager = dataManager;
             Logger = logger;
+            DataManagerManager = new DataManagerManager(dataManager);
 
             HuntHelperManager = new HuntHelperManager();
 
             // Invalidate the Placename cache because the sheet in here may not correspond to the correct ClientLanguage.
             // This is because Lumina caches the sheets but it doesn't seem to properly manage the language as part of the caching
-            DataManager.Excel.RemoveSheetFromCache<PlaceName>();
+            dataManager.Excel.RemoveSheetFromCache<PlaceName>();
             MainWindow = new MainWindow(HuntHelperManager);
 
             WindowSystem.AddWindow(MainWindow);

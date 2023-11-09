@@ -25,20 +25,23 @@ internal static class ParsingExtensions
     public static Result<MarkData, string> CreateMark(this GroupCollection groups, Func<string,uint> instanceParser)
     {
         var mapName = groups["map_name"].Value.Trim();
-        if (!Plugin.DataManager.GetMapDataByName().TryGetValue(mapName, out var map))
-        {
-            return $"Failed to find a map with name: {mapName}";
-        }
-        
-        var markName = groups["mark_name"].Value;
-        var x = float.Parse(groups["x_coord"].Value, CultureInfo.InvariantCulture);
-        var y = float.Parse(groups["y_coord"].Value, CultureInfo.InvariantCulture);
-        var instance = groups["instance"].Value.AsMaybe()
-            .Select(instance => instance.Length == 0 ? null : instance)
-            .Select(instance => (uint?)instanceParser.Invoke(instance!))
-            .GetValueOrDefault();
-
-        return new MarkData(markName, mapName, map.TerritoryId, map.RowId, instance, new Vector2(x, y));
+        return Plugin.DataManagerManager.GetMapDataByName(mapName)
+            .Match(
+                Result.Success<MapData, string>,
+                () => $"Failed to find a map with name: {mapName}"
+            )
+            .Map(map =>
+            {
+                var markName = groups["mark_name"].Value;
+                var x = float.Parse(groups["x_coord"].Value, CultureInfo.InvariantCulture);
+                var y = float.Parse(groups["y_coord"].Value, CultureInfo.InvariantCulture);
+                var instance = groups["instance"].Value.AsMaybe()
+                    .Select(instance => instance.Length == 0 ? null : instance)
+                    .Select(instance => (uint?)instanceParser.Invoke(instance!))
+                    .GetValueOrDefault();
+            
+                return new MarkData(markName, mapName, map.TerritoryId, map.RowId, instance, new Vector2(x, y));
+            });
     }
 }
 
@@ -67,7 +70,7 @@ public class SirenParser : ITrackerParser
     
     // For the format "(Maybe: Storsie) {LinkChar}Labyrinthos{I1Char} ( 17  , 9.6 ) "
     private static readonly Regex SirenRegex = new Regex(
-        $@"(\(Maybe: (?<mark_name>[\w+ '-]+)\) {LinkChar})?(?<map_name>[\w+ '-]+)(?<instance>[{I1Char}-{I9Char}]?)\s+\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
+        $@"\(Maybe: (?<mark_name>[\w+ '-]+)\) {LinkChar}(?<map_name>[\w+ '-]+)(?<instance>[{I1Char}-{I9Char}]?)\s+\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
         RegexOptions.Compiled);
 
     public bool CanParseLine(string inputLine) => SirenRegex.IsMatch(inputLine);
@@ -101,10 +104,14 @@ public class BearParser : ITrackerParser
 {
     // For the format "Labyrinthos ( 16.5 , 16.8 ) Storsie"
     private static readonly Regex BearRegex = new Regex(
-        @"(?<map_name>[\D'\s+-]*)\s*(?<instance>[1-9]?)\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)\s*(?<mark_name>[\w+ +-]+)",
+        @"(?<map_name>[\D'\s+-]+)\s*(?<instance>[1-9]?)\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)\s*(?<mark_name>\w[\w +-]+)",
         RegexOptions.Compiled);
 
-    public bool CanParseLine(string inputLine) => BearRegex.IsMatch(inputLine);
+    public bool CanParseLine(string inputLine)
+    {
+        var matches = BearRegex.Matches(inputLine);
+        return BearRegex.IsMatch(inputLine);
+    }
 
     public Result<MarkData, string> Parse(string inputLine)
     {

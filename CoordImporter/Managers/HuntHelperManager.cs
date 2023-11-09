@@ -121,11 +121,12 @@ public class HuntHelperManager : IDisposable {
     private static Maybe<TrainMark> ToTrainMark(MarkData markData)
     {
         return Plugin
-            .DataManager.GetMobIdByName(markData.MarkName)
-            .AsMaybe(() =>
+            .DataManagerManager.GetMobIdByName(markData.MarkName)
+            .Or(() =>
             {
                 Plugin.Logger.Warning("Could not find MobId for hunt mark: {0}", markData.MarkName);
                 Plugin.Chat.PrintError($"Skipping mark [{markData.MarkName}] -- could not find its MobId ;-;");
+                return Maybe.None;
             })
             .Select(mobId => new TrainMark(
                 markData.MarkName,
