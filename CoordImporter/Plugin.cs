@@ -14,12 +14,13 @@ namespace CoordImporter
         public string Name => "Coordinate Importer";
         private const string CommandName = "/ci";
 
-        public static DalamudPluginInterface PluginInterface { get; private set; }
+        public static DalamudPluginInterface PluginInterface { get; set; } = null!;
+        public static IChatGui Chat { get; set; } = null!;
+        public static IDataManager DataManager { get; set; } = null!;
+        public static IPluginLog Logger { get; set; } = null!;
+        
         private ICommandManager CommandManager { get; init; }
         private WindowSystem WindowSystem { get; } = new WindowSystem("CoordinateImporter");
-        public static IChatGui Chat { get; private set; } = null!;
-        public static IDataManager DataManager { get; private set; } = null!;
-        public static IPluginLog Logger { get; private set; } = null!;
         
         private HuntHelperManager HuntHelperManager { get; init; }
 

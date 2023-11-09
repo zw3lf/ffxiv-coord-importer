@@ -67,7 +67,7 @@ public class SirenParser : ITrackerParser
     
     // For the format "(Maybe: Storsie) {LinkChar}Labyrinthos{I1Char} ( 17  , 9.6 ) "
     private static readonly Regex SirenRegex = new Regex(
-        $@"(\(Maybe: (?<mark_name>[\w+ '-]+)\) {LinkChar})?(?<map_name>[\w+ '-]+)(?<instance>[{I1Char}-{I9Char}]?)\s+\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
+        $@"\(Maybe: (?<mark_name>[\w+ '-]+)\) {LinkChar}(?<map_name>[\w+ '-]+)(?<instance>[{I1Char}-{I9Char}]?)\s+\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)",
         RegexOptions.Compiled);
 
     public bool CanParseLine(string inputLine) => SirenRegex.IsMatch(inputLine);
@@ -101,10 +101,14 @@ public class BearParser : ITrackerParser
 {
     // For the format "Labyrinthos ( 16.5 , 16.8 ) Storsie"
     private static readonly Regex BearRegex = new Regex(
-        @"(?<map_name>[\D'\s+-]*)\s*(?<instance>[1-9]?)\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)\s*(?<mark_name>[\w+ +-]+)",
+        @"(?<map_name>[\D'\s+-]+)\s*(?<instance>[1-9]?)\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)\s*(?<mark_name>\w[\w +-]+)",
         RegexOptions.Compiled);
 
-    public bool CanParseLine(string inputLine) => BearRegex.IsMatch(inputLine);
+    public bool CanParseLine(string inputLine)
+    {
+        var matches = BearRegex.Matches(inputLine);
+        return BearRegex.IsMatch(inputLine);
+    }
 
     public Result<MarkData, string> Parse(string inputLine)
     {
