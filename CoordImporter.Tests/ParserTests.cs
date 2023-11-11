@@ -125,8 +125,3 @@ namespace CoordImporter.Tests
             };
     }
 }
-
-internal static class ParserTestExtensions
-{
-    
-}
