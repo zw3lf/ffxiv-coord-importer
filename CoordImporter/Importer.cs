@@ -74,9 +74,14 @@ namespace CoordImporter
             Maps = maps;
         }
 
-
         public List<MarkInformation> ParsePayload(string pastedPayload)
         {
+            var instanceKeyMap = new Dictionary<String, String>()
+            {
+                { "1", "\ue0b1" },
+                { "2", "\ue0b2" },
+                { "3", "\ue0b3" },
+            };
 
             var splitStrings = pastedPayload.Split(
                 new string[] { "\r\n", "\r", "\n" },
@@ -126,7 +131,7 @@ namespace CoordImporter
                     // use this dictionary to get the symbol for the output
                     instanceId = groups["instance_number"].Value.IsNullOrEmpty()
                                      ? null
-                                     : InstanceKeyMap[groups["instance_number"].Value];
+                                     : instanceKeyMap[groups["instance_number"].Value];
                 }
                 var mapName = groups["map_name"].Value.Trim();
                 Maps.TryGetValue(mapName, out var map);

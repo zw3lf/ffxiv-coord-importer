@@ -93,6 +93,8 @@ namespace CoordImporter
             DataManager.Excel.RemoveSheetFromCache<PlaceName>();
             this.Importer = new Importer(Chat, Logger, maps);
 
+            this.Importer = new Importer(Chat, Logger, maps);
+
             MainWindow = new MainWindow(this);
 
             WindowSystem.AddWindow(MainWindow);
