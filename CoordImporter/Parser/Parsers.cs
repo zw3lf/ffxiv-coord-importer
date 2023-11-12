@@ -67,7 +67,7 @@ public partial class SirenParser : ITrackerParser
     private static readonly char I1Char = SeIconChar.Instance1.ToIconChar();
     
     // For the format "(Maybe: Storsie) {LinkChar}Labyrinthos{I1Char} ( 17  , 9.6 ) "
-    [GeneratedRegex($@"\(Maybe: (?<mark_name>[\w+ '-]+)\) \ue0bb(?<map_name>[\w+ '-]+)(?<instance>[\ue0b1-\ue0b9]?)\s+\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)", RegexOptions.Compiled)]
+    [GeneratedRegex($@"\((Maybe: )?(?<mark_name>[\w '-]+)\) \ue0bb(?<map_name>[\w '-]+)(?<instance>[\ue0b1-\ue0b9]?)\s+\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)")]
     private static partial Regex SirenRegex();
 
     public bool CanParseLine(string inputLine) => SirenRegex().IsMatch(inputLine);
@@ -83,7 +83,7 @@ public partial class SirenParser : ITrackerParser
 public partial class FaloopParser : ITrackerParser
 {
     // For the format "Raiden [S]: Gamma - Yanxia ( 23.6, 11.4 )"
-    [GeneratedRegex(@"(?<world_name>[a-zA-Z0-9'-]+)\s+\[S\]: (?<mark_name>[\w+ '-]+) - (?<map_name>[\w+ '-]+)\s+\(?(?<instance>[1-9]?)\)?\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)", RegexOptions.Compiled)]
+    [GeneratedRegex(@"(?<world_name>[a-zA-Z0-9'-]+)\s+\[S\]: (?<mark_name>[\w '-]+) - (?<map_name>[\w '-]+)\s+\(?(?<instance>[1-9]?)\)?\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)")]
     private static partial Regex FaloopRegex();
 
     public bool CanParseLine(string inputLine) => FaloopRegex().IsMatch(inputLine);
@@ -99,7 +99,7 @@ public partial class FaloopParser : ITrackerParser
 public partial class BearParser : ITrackerParser
 {
     // For the format "Labyrinthos ( 16.5 , 16.8 ) Storsie"
-    [GeneratedRegex(@"(?<map_name>[\D'\s+-]+)\s*(?<instance>[1-9]?)\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)\s*(?<mark_name>\w[\w +-]+)", RegexOptions.Compiled)]
+    [GeneratedRegex(@"(?<map_name>[\D'\s-]+)\s*(?<instance>[1-9]?)\s*\(\s*(?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)\s*\)\s*(?<mark_name>\w[\w -]+)")]
     private static partial Regex BearRegex();
 
     public bool CanParseLine(string inputLine) => BearRegex().IsMatch(inputLine);

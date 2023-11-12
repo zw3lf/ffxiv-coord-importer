@@ -41,9 +41,6 @@ namespace CoordImporter
 
             HuntHelperManager = new HuntHelperManager();
 
-            // Invalidate the Placename cache because the sheet in here may not correspond to the correct ClientLanguage.
-            // This is because Lumina caches the sheets but it doesn't seem to properly manage the language as part of the caching
-            dataManager.Excel.RemoveSheetFromCache<PlaceName>();
             MainWindow = new MainWindow(HuntHelperManager);
 
             WindowSystem.AddWindow(MainWindow);
