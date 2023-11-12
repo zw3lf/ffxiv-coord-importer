@@ -32,12 +32,12 @@ public class DataManagerManager : IDataManagerManager
     
     public Maybe<uint> GetMobIdByName(string mobName)
     {
-        if (MobIdsByName.TryGetValue(mobName, out var mobId)) return mobId;
+        if (MobIdsByName.TryGetValue(mobName.ToLowerInvariant(), out var mobId)) return mobId;
         return Maybe.None;
     }
     public Maybe<MapData> GetMapDataByName(string mapName)
     {
-        if (MapDataByName.TryGetValue(mapName, out var map)) return map;
+        if (MapDataByName.TryGetValue(mapName.ToLowerInvariant(), out var map)) return map;
         return Maybe.None;
     }
     
@@ -85,7 +85,7 @@ public class DataManagerManager : IDataManagerManager
                     Plugin.Logger.Verbose("Failed to load PlaceName");
                     continue;
                 }
-                var placeName = placeNameValue.Name.ToString();
+                var placeName = placeNameValue.Name.ToString().ToLowerInvariant();
 
                 var mapData = new MapData(territory.RowId, territory.Map.Row);
 
