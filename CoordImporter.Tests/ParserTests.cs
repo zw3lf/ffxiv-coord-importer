@@ -1,6 +1,7 @@
 using CoordImporter.Managers;
 using CoordImporter.Parser;
 using CSharpFunctionalExtensions;
+using Dalamud.Game.Text;
 using Dalamud.Plugin.Services;
 using NSubstitute;
 using NSubstitute.ReceivedExtensions;
@@ -12,13 +13,16 @@ namespace CoordImporter.Tests
     [TestFixture]
     public class ParserTests
     {
+        private static readonly string LinkChar = SeIconChar.LinkMarker.ToIconString();
+        private static readonly string I2Char = SeIconChar.Instance2.ToIconString();
+        
         // trailing space is actually in the Siren output >:T
-        private const string TestSirenInputLine = "(Maybe: Stolas) \ue0bbThe Dravanian Hinterlands ( 26.85  , 20.05 ) ";
-        private const string TestFaloopInputLine = "Raiden [S]: Gamma - Yanxia ( 23.6, 11.4 )";
-        private const string TestBearInputLine = "The Rak'tika Greatwood ( 14.6 , 22.3 ) Supay";
-        private const string TestSirenInstancedInputLine = "(Yilan) \ue0bbThavnair\ue0b2 ( 26.8  , 20.9 )  (Instance TWO) ";
-        private const string TestFaloopInstancedInputLine = "Odin [S]: Vogaal Ja - Middle La Noscea (1) ( 8.2, 32.65 )";
-        private const string TestBearInstancedInputLine = "Thavnair 3 ( 27.6 , 25.6 ) Sugriva";
+        private static readonly string TestSirenInputLine = $@"(Maybe: Stolas) {LinkChar}The Dravanian Hinterlands ( 26.85  , 20.05 ) ";
+        private static readonly string TestFaloopInputLine = @"Raiden [S]: Gamma - Yanxia ( 23.6, 11.4 )";
+        private static readonly string TestBearInputLine = @"The Rak'tika Greatwood ( 14.6 , 22.3 ) Supay";
+        private static readonly string TestSirenInstancedInputLine = $@"(Yilan) {LinkChar}Thavnair{I2Char} ( 26.8  , 20.9 )  (Instance TWO) ";
+        private static readonly string TestFaloopInstancedInputLine = @"Odin [S]: Vogaal Ja - Middle La Noscea (1) ( 8.2, 32.65 )";
+        private static readonly string TestBearInstancedInputLine = @"Thavnair 3 ( 27.6 , 25.6 ) Sugriva";
         private static readonly MarkData TestSirenMarkData =
             new MarkData("Stolas", "The Dravanian Hinterlands", 362, 712, null, new Vector2(26.85f, 20.05f));
         private static readonly MarkData TestFaloopMarkData =
