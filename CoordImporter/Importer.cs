@@ -9,21 +9,22 @@ namespace CoordImporter;
 
 public class Importer
 {
-    private static IList<ITrackerParser> Parsers = new List<ITrackerParser>()
+    public Importer(IEnumerable<ITrackerParser> parsers)
     {
-        new SirenParser(),
-        new FaloopParser(),
-        new BearParser()
-    }.ToImmutableList();
+        Parsers = parsers.ToImmutableList();
+    }
 
-    public static IEnumerable<Result<MarkData, string>> ParsePayload(string payload) => payload
-        .Split(
-            new string[] {"\r\n", "\r", "\n"},
-            StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-        .Select(inputLine => Parsers
-            .FirstOrDefault(parser => parser.CanParseLine(inputLine))
-            .ToResult($"Format not recognized for input: {inputLine}")
-            .Bind(parser => parser.Parse(inputLine))
-        )
-        .ToImmutableList();
+    private IList<ITrackerParser> Parsers;
+
+    public IEnumerable<Result<MarkData, string>> ParsePayload(string payload) =>
+        payload
+            .Split(
+                new string[] { "\r\n", "\r", "\n" },
+                StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Select(inputLine => Parsers
+                                 .FirstOrDefault(parser => parser.CanParseLine(inputLine))
+                                 .ToResult($"Format not recognized for input: {inputLine}")
+                                 .Bind(parser => parser.Parse(inputLine))
+            )
+            .ToImmutableList();
 }

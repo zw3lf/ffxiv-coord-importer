@@ -6,11 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 
 namespace CoordImporter.Managers;
 
-public class HuntHelperManager : IDisposable {
-
+public class HuntHelperManager : IDisposable
+{
     private const uint SupportedVersion = 1;
 
     private readonly ICallGateSubscriber<uint> cgGetVersion;
@@ -18,14 +20,21 @@ public class HuntHelperManager : IDisposable {
     private readonly ICallGateSubscriber<bool> cgDisable;
     private readonly ICallGateSubscriber<List<TrainMark>, bool> cgImportTrainList;
 
+    private IPluginLog Logger { get; init; }
+    private IDataManagerManager DataManagerManager { get; init; }
+    private IChatGui Chat { get; init; }
+
     public bool Available { get; private set; } = false;
 
-    public HuntHelperManager()
+    public HuntHelperManager(DalamudPluginInterface pluginInterface, IPluginLog logger, IDataManagerManager dataManagerManager, IChatGui chat)
     {
-        cgGetVersion = Plugin.PluginInterface.GetIpcSubscriber<uint>("HH.GetVersion");
-        cgEnable = Plugin.PluginInterface.GetIpcSubscriber<uint, bool>("HH.Enable");
-        cgDisable = Plugin.PluginInterface.GetIpcSubscriber<bool>("HH.Disable");
-        cgImportTrainList = Plugin.PluginInterface.GetIpcSubscriber<List<TrainMark>, bool>("HH.ImportTrainList");
+        Logger = logger;
+        DataManagerManager = dataManagerManager;
+        Chat = chat;
+        cgGetVersion = pluginInterface.GetIpcSubscriber<uint>("HH.GetVersion");
+        cgEnable = pluginInterface.GetIpcSubscriber<uint, bool>("HH.Enable");
+        cgDisable = pluginInterface.GetIpcSubscriber<bool>("HH.Disable");
+        cgImportTrainList = pluginInterface.GetIpcSubscriber<List<TrainMark>, bool>("HH.ImportTrainList");
 
         CheckVersion();
         cgEnable.Subscribe(OnEnable);
@@ -45,7 +54,7 @@ public class HuntHelperManager : IDisposable {
 
     private void OnDisable()
     {
-        Plugin.Logger.Info("Hunt Helper IPC has been disabled. Disabling support.");
+        Logger.Info("Hunt Helper IPC has been disabled. Disabling support.");
         Available = false;
     }
 
@@ -56,12 +65,12 @@ public class HuntHelperManager : IDisposable {
             version ??= cgGetVersion.InvokeFunc();
             if (version == SupportedVersion)
             {
-                Plugin.Logger.Info("Hunt Helper IPC version {0} detected. Enabling support.", version);
+                Logger.Info("Hunt Helper IPC version {0} detected. Enabling support.", version);
                 Available = true;
             }
             else
             {
-                Plugin.Logger.Warning(
+                Logger.Warning(
                     "Hunt Helper IPC version {0} required, but version {1} detected. Disabling support.",
                     SupportedVersion,
                     version
@@ -71,7 +80,7 @@ public class HuntHelperManager : IDisposable {
         }
         catch (IpcNotReadyError e)
         {
-            Plugin.Logger.Info("Hunt Helper is not yet available. Disabling support until it is.");
+            Logger.Info("Hunt Helper is not yet available. Disabling support until it is.");
             Available = false;
         }
     }
@@ -79,12 +88,12 @@ public class HuntHelperManager : IDisposable {
     public Maybe<string> ImportTrainList(IEnumerable<MarkData> marks)
     {
         return ExecuteIpcAction(() => cgImportTrainList
-            .InvokeAction(
-                marks
-                    .Select(ToTrainMark)
-                    .Choose()
-                    .ToList()
-            )
+                                    .InvokeAction(
+                                        marks
+                                            .Select(ToTrainMark)
+                                            .Choose()
+                                            .ToList()
+                                    )
         );
     }
 
@@ -102,7 +111,7 @@ public class HuntHelperManager : IDisposable {
         }
         catch (IpcNotReadyError e)
         {
-            Plugin.Logger.Warning(
+            Logger.Warning(
                 "Hunt Helper appears to have disappeared ;-;. Can't complete the operation ;-;. Disabling support until it comes back."
             );
             Available = false;
@@ -111,33 +120,34 @@ public class HuntHelperManager : IDisposable {
         catch (IpcError e)
         {
             const string message = "Hmm...something unexpected happened communicating with Hunt Helper :T";
-            Plugin.Logger.Error(e, message);
+            Logger.Error(e, message);
             return message;
         }
 
         return Maybe.None;
     }
 
-    private static Maybe<TrainMark> ToTrainMark(MarkData markData)
+    private Maybe<TrainMark> ToTrainMark(MarkData markData)
     {
-        return Plugin
-            .DataManagerManager.GetMobIdByName(markData.MarkName)
-            .Or(() =>
-            {
-                Plugin.Logger.Warning("Could not find MobId for hunt mark: {0}", markData.MarkName);
-                Plugin.Chat.PrintError($"Skipping mark [{markData.MarkName}] -- could not find its MobId ;-;");
-                return Maybe.None;
-            })
-            .Select(mobId => new TrainMark(
-                markData.MarkName,
-                (uint)mobId!,
-                markData.TerritoryId,
-                markData.MapId,
-                markData.Instance ?? 0,
-                markData.Position,
-                false,
-                DateTime.Now.ToUniversalTime()
-            ));
+        return DataManagerManager
+               .GetMobIdByName(markData.MarkName)
+               .Or(() =>
+               {
+                   Logger.Warning("Could not find MobId for hunt mark: {0}", markData.MarkName);
+                   Chat.PrintError($"Skipping mark [{markData.MarkName}] -- could not find its MobId ;-;");
+                   return Maybe.None;
+               })
+               .Select(mobId =>
+                           new TrainMark(
+                               markData.MarkName,
+                               (uint)mobId!,
+                               markData.TerritoryId,
+                               markData.MapId,
+                               markData.Instance ?? 0,
+                               markData.Position,
+                               false,
+                               DateTime.Now.ToUniversalTime()
+                           ));
     }
 
     private record struct TrainMark(
