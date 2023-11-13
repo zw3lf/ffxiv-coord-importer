@@ -12,23 +12,30 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
+using Dalamud.Plugin.Services;
 
 namespace CoordImporter.Windows;
 
 public sealed class MainWindow : Window, IDisposable
 {
-    private string textBuffer = string.Empty;
-    private HuntHelperManager huntHelperManager;
+    private IPluginLog Logger;
+    private IChatGui Chat;
+    private Importer Importer;
+    private HuntHelperManager HuntHelperManager;
 
-    public MainWindow(HuntHelperManager huntHelperManager) : base("Coordinate Importer")
+    private string textBuffer = string.Empty;
+
+    public MainWindow(IPluginLog logger, IChatGui chat, Importer importer, HuntHelperManager huntHelperManager) : base("Coordinate Importer")
     {
         this.SizeConstraints = new WindowSizeConstraints
         {
             MinimumSize = new Vector2(100, 85),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
-
-        this.huntHelperManager = huntHelperManager;
+        Logger = logger;
+        Chat = chat;
+        Importer = importer;
+        HuntHelperManager = huntHelperManager;
     }
 
     public void Dispose() { }
@@ -49,7 +56,7 @@ public sealed class MainWindow : Window, IDisposable
         {
             ImGui.SetTooltip("Import to Hunt Helper");
         }
-        
+
         ImGui.SameLine();
         ImGui.Dummy(new Vector2(24.0f, 0.0f));
         ImGui.SameLine();
@@ -78,8 +85,8 @@ public sealed class MainWindow : Window, IDisposable
             .ForEach(markDataResult =>
             {
                 markDataResult.Match(
-                    markData => Plugin.Chat.Print(CreateMapLink(markData)),
-                    error => Plugin.Chat.PrintError(error)
+                    markData => Chat.Print(CreateMapLink(markData)),
+                    error => Chat.PrintError(error)
                 );
             });
     }
@@ -87,25 +94,25 @@ public sealed class MainWindow : Window, IDisposable
     private void ImportToHuntHelper(string payload)
     {
         var marks = Importer
-            .ParsePayload(payload)
-            .Select(result => result.Match(
-                markData => Maybe.From(markData),
-                error =>
-                {
-                    Plugin.Chat.PrintError(error);
-                    return Maybe.None;
-                }
-            ))
-            .Choose()
-            .ToImmutableList();
-        
-        Plugin.Logger.Debug(string.Join(", ", marks));
+                    .ParsePayload(payload)
+                    .Select(result => result.Match(
+                                markData => Maybe.From(markData),
+                                error =>
+                                {
+                                    Chat.PrintError(error);
+                                    return Maybe.None;
+                                }
+                            ))
+                    .Choose()
+                    .ToImmutableList();
 
-        huntHelperManager
+        Logger.Debug(string.Join(", ", marks));
+
+        HuntHelperManager
             .ImportTrainList(marks)
-            .Execute(error => Plugin.Chat.PrintError(error));
+            .Execute(error => Chat.PrintError(error));
     }
-    
+
     // This is a custom version of Dalamud's CreateMapLink method. It includes the mark name and the instance ID
     private SeString CreateMapLink(MarkData markData)
     {
