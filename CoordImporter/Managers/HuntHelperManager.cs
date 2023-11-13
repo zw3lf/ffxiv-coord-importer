@@ -1,16 +1,16 @@
-﻿using CoordImporter.Parser;
-using CSharpFunctionalExtensions;
-using Dalamud.Plugin.Ipc;
-using Dalamud.Plugin.Ipc.Exceptions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using CoordImporter.Parser;
+using CSharpFunctionalExtensions;
+using Dalamud.Plugin.Ipc;
+using Dalamud.Plugin.Ipc.Exceptions;
 
 namespace CoordImporter.Managers;
 
-public class HuntHelperManager : IDisposable {
-
+public class HuntHelperManager : IDisposable
+{
     private const uint SupportedVersion = 1;
 
     private readonly ICallGateSubscriber<uint> cgGetVersion;
@@ -18,7 +18,7 @@ public class HuntHelperManager : IDisposable {
     private readonly ICallGateSubscriber<bool> cgDisable;
     private readonly ICallGateSubscriber<List<TrainMark>, bool> cgImportTrainList;
 
-    public bool Available { get; private set; } = false;
+    public bool Available { get; private set; }
 
     public HuntHelperManager()
     {
@@ -38,10 +38,7 @@ public class HuntHelperManager : IDisposable {
         cgDisable.Unsubscribe(OnDisable);
     }
 
-    private void OnEnable(uint version)
-    {
-        CheckVersion(version);
-    }
+    private void OnEnable(uint version) => CheckVersion(version);
 
     private void OnDisable()
     {
@@ -76,21 +73,19 @@ public class HuntHelperManager : IDisposable {
         }
     }
 
-    public Maybe<string> ImportTrainList(IEnumerable<MarkData> marks)
-    {
-        return ExecuteIpcAction(() => cgImportTrainList
-            .InvokeAction(
-                marks
-                    .Select(ToTrainMark)
-                    .Choose()
-                    .ToList()
-            )
+    public Maybe<string> ImportTrainList(IEnumerable<MarkData> marks) =>
+        ExecuteIpcAction(
+            () => cgImportTrainList
+                .InvokeAction(
+                    marks
+                        .Select(ToTrainMark)
+                        .Choose()
+                        .ToList()
+                )
         );
-    }
 
     private Maybe<string> ExecuteIpcAction(Action ipcAction)
     {
-
         if (!Available)
         {
             return "Hunt Helper is not currently available ;-;";
@@ -118,27 +113,29 @@ public class HuntHelperManager : IDisposable {
         return Maybe.None;
     }
 
-    private static Maybe<TrainMark> ToTrainMark(MarkData markData)
-    {
-        return Plugin
+    private static Maybe<TrainMark> ToTrainMark(MarkData markData) =>
+        Plugin
             .DataManagerManager.GetMobIdByName(markData.MarkName)
-            .Or(() =>
-            {
-                Plugin.Logger.Warning("Could not find MobId for hunt mark: {0}", markData.MarkName);
-                Plugin.Chat.PrintError($"Skipping mark [{markData.MarkName}] -- could not find its MobId ;-;");
-                return Maybe.None;
-            })
-            .Select(mobId => new TrainMark(
-                markData.MarkName,
-                (uint)mobId!,
-                markData.TerritoryId,
-                markData.MapId,
-                markData.Instance ?? 0,
-                markData.Position,
-                false,
-                DateTime.Now.ToUniversalTime()
-            ));
-    }
+            .Or(
+                () =>
+                {
+                    Plugin.Logger.Warning("Could not find MobId for hunt mark: {0}", markData.MarkName);
+                    Plugin.Chat.PrintError($"Skipping mark [{markData.MarkName}] -- could not find its MobId ;-;");
+                    return Maybe.None;
+                }
+            )
+            .Select(
+                mobId => new TrainMark(
+                    markData.MarkName,
+                    mobId!,
+                    markData.TerritoryId,
+                    markData.MapId,
+                    markData.Instance ?? 0,
+                    markData.Position,
+                    false,
+                    DateTime.Now.ToUniversalTime()
+                )
+            );
 
     private record struct TrainMark(
         string Name,

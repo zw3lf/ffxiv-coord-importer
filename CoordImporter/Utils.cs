@@ -1,8 +1,8 @@
-﻿using CSharpFunctionalExtensions;
-using Dalamud.Game.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CSharpFunctionalExtensions;
+using Dalamud.Game.Text;
 
 namespace CoordImporter;
 
@@ -15,9 +15,10 @@ public static class Utils
         {
             action.Invoke(value);
         }
+
         return values;
     }
-    
+
     public static IEnumerable<T> Flatten<T>(this IEnumerable<IEnumerable<T>> source) =>
         source.SelectMany(values => values);
 
