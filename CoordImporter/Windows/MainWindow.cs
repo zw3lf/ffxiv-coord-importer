@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Numerics;
 using CoordImporter.Managers;
 using CoordImporter.Parser;
 using CSharpFunctionalExtensions;
@@ -7,25 +12,20 @@ using Dalamud.Interface;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Numerics;
 
 namespace CoordImporter.Windows;
 
 public sealed class MainWindow : Window, IDisposable
 {
     private string textBuffer = string.Empty;
-    private HuntHelperManager huntHelperManager;
+    private readonly HuntHelperManager huntHelperManager;
 
     public MainWindow(HuntHelperManager huntHelperManager) : base("Coordinate Importer")
     {
-        this.SizeConstraints = new WindowSizeConstraints
+        SizeConstraints = new WindowSizeConstraints
         {
             MinimumSize = new Vector2(100, 85),
-            MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
+            MaximumSize = new Vector2(float.MaxValue, float.MaxValue),
         };
 
         this.huntHelperManager = huntHelperManager;
@@ -40,16 +40,18 @@ public sealed class MainWindow : Window, IDisposable
         {
             PerformImport(textBuffer);
         }
+
         ImGui.SameLine();
         if (ImGuiComponents.IconButton(FontAwesomeIcon.ArrowUpFromBracket))
         {
             ImportToHuntHelper(textBuffer);
         }
+
         if (ImGui.IsItemHovered())
         {
             ImGui.SetTooltip("Import to Hunt Helper");
         }
-        
+
         ImGui.SameLine();
         ImGui.Dummy(new Vector2(24.0f, 0.0f));
         ImGui.SameLine();
@@ -57,13 +59,14 @@ public sealed class MainWindow : Window, IDisposable
         {
             textBuffer = "";
         }
+
         ImGui.Text("Paste Coordinates:");
         ImGui.Indent(10);
 
-        Vector2 availableSpace = ImGui.GetContentRegionAvail();
-        Vector2 padding = new Vector2(10, 10);
+        var availableSpace = ImGui.GetContentRegionAvail();
+        var padding = new Vector2(10, 10);
 
-        Vector2 dynamicSize = new Vector2(
+        var dynamicSize = new Vector2(
             availableSpace.X - padding.X,
             availableSpace.Y - padding.Y
         );
@@ -71,53 +74,61 @@ public sealed class MainWindow : Window, IDisposable
         ImGui.InputTextMultiline("", ref textBuffer, 16384, dynamicSize, ImGuiInputTextFlags.None);
     }
 
-    private void PerformImport(string payload)
-    {
+    private void PerformImport(string payload) =>
         Importer
             .ParsePayload(payload)
-            .ForEach(markDataResult =>
-            {
-                markDataResult.Match(
-                    markData => Plugin.Chat.Print(CreateMapLink(markData)),
-                    error => Plugin.Chat.PrintError(error)
-                );
-            });
-    }
+            .ForEach(
+                markDataResult =>
+                {
+                    markDataResult.Match(
+                        markData => Plugin.Chat.Print(CreateMapLink(markData)),
+                        error => Plugin.Chat.PrintError(error)
+                    );
+                }
+            );
 
     private void ImportToHuntHelper(string payload)
     {
         var marks = Importer
             .ParsePayload(payload)
-            .Select(result => result.Match(
-                markData => Maybe.From(markData),
-                error =>
-                {
-                    Plugin.Chat.PrintError(error);
-                    return Maybe.None;
-                }
-            ))
+            .Select(
+                result => result.Match(
+                    markData => Maybe.From(markData),
+                    error =>
+                    {
+                        Plugin.Chat.PrintError(error);
+                        return Maybe.None;
+                    }
+                )
+            )
             .Choose()
             .ToImmutableList();
-        
+
         Plugin.Logger.Debug(string.Join(", ", marks));
 
         huntHelperManager
             .ImportTrainList(marks)
             .Execute(error => Plugin.Chat.PrintError(error));
     }
-    
+
     // This is a custom version of Dalamud's CreateMapLink method. It includes the mark name and the instance ID
     private SeString CreateMapLink(MarkData markData)
     {
-        var mapLinkPayload = new MapLinkPayload(markData.TerritoryId, markData.MapId, markData.Position.X, markData.Position.Y);
-        var text = mapLinkPayload.PlaceName + markData.Instance.AsInstanceIcon() + " " + mapLinkPayload.CoordinateString;
+        var mapLinkPayload = new MapLinkPayload(
+            markData.TerritoryId,
+            markData.MapId,
+            markData.Position.X,
+            markData.Position.Y
+        );
+        var text = mapLinkPayload.PlaceName + markData.Instance.AsInstanceIcon() + " " +
+            mapLinkPayload.CoordinateString;
 
-        List<Payload> payloads = new List<Payload>()
+        var payloads = new List<Payload>
         {
             mapLinkPayload,
             new TextPayload(text),
             new TextPayload($" ({markData.MarkName})"),
-            RawPayload.LinkTerminator
+            RawPayload.LinkTerminator,
         };
         payloads.InsertRange(1, SeString.TextArrowPayloads);
         return new SeString(payloads);
