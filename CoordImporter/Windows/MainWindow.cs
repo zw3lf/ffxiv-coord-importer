@@ -15,7 +15,7 @@ using System.Numerics;
 
 namespace CoordImporter.Windows;
 
-public class MainWindow : Window, IDisposable
+public sealed class MainWindow : Window, IDisposable
 {
     private string textBuffer = string.Empty;
     private HuntHelperManager huntHelperManager;
@@ -24,7 +24,7 @@ public class MainWindow : Window, IDisposable
     {
         this.SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(100, 65),
+            MinimumSize = new Vector2(100, 85),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
 

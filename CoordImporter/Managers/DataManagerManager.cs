@@ -2,6 +2,7 @@
 using CSharpFunctionalExtensions;
 using Dalamud;
 using Dalamud.Plugin.Services;
+using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Collections.Generic;
@@ -10,37 +11,49 @@ using System.Linq;
 
 namespace CoordImporter.Managers;
 
-public static class DataManagerExtensions
+public class DataManagerManager : IDataManagerManager
 {
-    #region mark name data
-    private static IReadOnlyDictionary<string, uint>? MobIdsByName;
-    public static IReadOnlyDictionary<string, uint> GetMobIdsByName(this IDataManager dataManager) =>
-        MobIdsByName ??= LoadMobIds();
-
-    public static uint? GetMobIdByName(this IDataManager dataManager, string name)
+    private readonly IDataManager dataManager;
+    
+    private IReadOnlyDictionary<string, uint> MobIdsByName { get; init; }
+    private IReadOnlyDictionary<string, MapData> MapDataByName { get; init; }
+    
+    public DataManagerManager(IDataManager dataManager)
     {
-        var valueGotten = dataManager.GetMobIdsByName().TryGetValue(
-            name.ToLowerInvariant(),
-            out var mobId
-        );
-        if (valueGotten) return mobId;
-        return null;
-    }
+        this.dataManager = dataManager;
 
-    private static IReadOnlyDictionary<string, uint> LoadMobIds() =>
+        MobIdsByName = LoadMobIds();
+        MapDataByName = LoadMapData();
+    }
+    public ExcelSheet<T>? GetExcelSheet<T>() where T : ExcelRow => dataManager.GetExcelSheet<T>();
+    
+    public ExcelSheet<T>? GetExcelSheet<T>(ClientLanguage clientLanguage) where T : ExcelRow =>
+        dataManager.GetExcelSheet<T>(clientLanguage);
+    
+    public Maybe<uint> GetMobIdByName(string mobName)
+    {
+        if (MobIdsByName.TryGetValue(mobName.ToLowerInvariant(), out var mobId)) return mobId;
+        return Maybe.None;
+    }
+    public Maybe<MapData> GetMapDataByName(string mapName)
+    {
+        if (MapDataByName.TryGetValue(mapName.ToLowerInvariant(), out var map)) return map;
+        return Maybe.None;
+    }
+    
+    private IReadOnlyDictionary<string, uint> LoadMobIds() =>
         (Enum.GetValuesAsUnderlyingType<ClientLanguage>() as ClientLanguage[])!
         .Select(clientLanguage =>
         {
             Plugin.Logger.Verbose($"Loading mark names for language: {clientLanguage}");
 
-            return Plugin
-                .DataManager.GetExcelSheet<BNpcName>(clientLanguage)
+            return dataManager.GetExcelSheet<BNpcName>(clientLanguage)
                 .AsMaybe(() => Plugin.Logger.Verbose($"Could not find BNpcName sheet for language: {clientLanguage}"))
                 .Select(nameSheet => nameSheet as IEnumerable<BNpcName>)
                 .GetValueOrDefault(new List<BNpcName>())
                 .Select(name => ((uint RowId, string Name))(name.RowId, name.Singular.ToString().ToLowerInvariant()))
                 .ForEach(name =>
-                        Plugin.Logger.Verbose("Found mobId [{0}] for name: {1}", name.RowId, name.Name)
+                    Plugin.Logger.Verbose("Found mobId [{0}] for name: {1}", name.RowId, name.Name)
                 );
         })
         .Flatten()
@@ -49,14 +62,8 @@ public static class DataManagerExtensions
             name => name.Name,
             name => name.RowId
         );
-    #endregion
-
-    #region map data
-    private static IReadOnlyDictionary<string, MapData>? MapDataByName;
-    public static IReadOnlyDictionary<string, MapData> GetMapDataByName(this IDataManager dataManager) =>
-        MapDataByName ??= LoadMapData();
-
-    private static IReadOnlyDictionary<string, MapData> LoadMapData()
+    
+    private IReadOnlyDictionary<string, MapData> LoadMapData()
     {
         // This should support names of maps in all available languages. We create a dictionary where the key is the
         // name of the map (in whatever language) and the value is the map data we care about.
@@ -66,8 +73,8 @@ public static class DataManagerExtensions
         foreach (var clientLanguage in clientLanguages)
         {
             Plugin.Logger.Verbose($"Loading map data for language: {clientLanguage}");
-            var territorySheet = Plugin.DataManager.GetExcelSheet<TerritoryType>(clientLanguage);
-            var placeSheet = Plugin.DataManager.GetExcelSheet<PlaceName>(clientLanguage);
+            var territorySheet = dataManager.GetExcelSheet<TerritoryType>(clientLanguage);
+            var placeSheet = dataManager.GetExcelSheet<PlaceName>(clientLanguage);
             if (territorySheet == null || placeSheet == null) continue;
 
             foreach (var territory in territorySheet)
@@ -78,7 +85,7 @@ public static class DataManagerExtensions
                     Plugin.Logger.Verbose("Failed to load PlaceName");
                     continue;
                 }
-                var placeName = placeNameValue.Name.ToString();
+                var placeName = placeNameValue.Name.ToString().ToLowerInvariant();
 
                 var mapData = new MapData(territory.RowId, territory.Map.Row);
 
@@ -93,5 +100,4 @@ public static class DataManagerExtensions
 
         return mapDict.ToImmutableDictionary();
     }
-    #endregion
 }
