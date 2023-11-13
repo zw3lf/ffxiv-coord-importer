@@ -13,16 +13,16 @@ namespace CoordImporter.Managers;
 
 public class DataManagerManager : IDataManagerManager
 {
-    private readonly IDataManager DataManager;
     private readonly IPluginLog Logger;
+    private readonly IDataManager DataManager;
 
     private IReadOnlyDictionary<string, uint> MobIdsByName { get; init; }
     private IReadOnlyDictionary<string, MapData> MapDataByName { get; init; }
 
-    public DataManagerManager(IDataManager dataManager, IPluginLog logger)
+    public DataManagerManager(IPluginLog logger, IDataManager dataManager)
     {
-        DataManager = dataManager;
         Logger = logger;
+        DataManager = dataManager;
 
         MobIdsByName = LoadMobIds();
         MapDataByName = LoadMapData();

@@ -18,23 +18,24 @@ namespace CoordImporter.Windows;
 
 public sealed class MainWindow : Window, IDisposable
 {
-    private string textBuffer = string.Empty;
-    private IChatGui Chat;
-    private HuntHelperManager HuntHelperManager;
     private IPluginLog Logger;
+    private IChatGui Chat;
     private Importer Importer;
+    private HuntHelperManager HuntHelperManager;
 
-    public MainWindow(HuntHelperManager huntHelperManager, IChatGui chat, IPluginLog logger, Importer importer) : base("Coordinate Importer")
+    private string textBuffer = string.Empty;
+
+    public MainWindow(IPluginLog logger, IChatGui chat, Importer importer, HuntHelperManager huntHelperManager) : base("Coordinate Importer")
     {
         this.SizeConstraints = new WindowSizeConstraints
         {
             MinimumSize = new Vector2(100, 85),
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
-        Chat = chat;
-        HuntHelperManager = huntHelperManager;
         Logger = logger;
+        Chat = chat;
         Importer = importer;
+        HuntHelperManager = huntHelperManager;
     }
 
     public void Dispose() { }
