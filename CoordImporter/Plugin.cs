@@ -7,7 +7,6 @@ using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Lumina.Excel.GeneratedSheets;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -32,17 +31,16 @@ namespace CoordImporter
             [RequiredVersion("1.0")] IPluginLog logger)
         {
             HostApplicationBuilder builder = Host.CreateApplicationBuilder();
-
-            builder.Services.AddSingleton(chat);
             builder.Services.AddSingleton(logger);
+            builder.Services.AddSingleton(chat);
             builder.Services.AddSingleton(dataManager);
-            builder.Services.AddSingleton(pluginInterface);
-            builder.Services.AddSingleton<HuntHelperManager>();
             builder.Services.AddSingleton<IDataManagerManager, DataManagerManager>();
-            builder.Services.AddSingleton<MainWindow>();
             builder.Services.AddSingleton<ITrackerParser, BearParser>();
             builder.Services.AddSingleton<ITrackerParser, FaloopParser>();
             builder.Services.AddSingleton<ITrackerParser, SirenParser>();
+            builder.Services.AddSingleton<BearParser>();
+            builder.Services.AddSingleton<FaloopParser>();
+            builder.Services.AddSingleton<SirenParser>();
             builder.Services.AddSingleton<Importer>();
             using IHost host = builder.Build();
 
