@@ -26,5 +26,6 @@ public class Importer
                                  .ToResult($"Format not recognized for input: {inputLine}")
                                  .Bind(parser => parser.Parse(inputLine))
             )
+            .Where(result => !ITrackerParser.ParseErrorIgnoreMark.Equals(result))
             .ToImmutableList();
 }
