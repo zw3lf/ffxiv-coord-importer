@@ -12,6 +12,9 @@ namespace CoordImporter.Parser;
 
 public interface ITrackerParser
 {
+    public static readonly Result<MarkData, string> ParseErrorIgnoreMark =
+        Result.Failure<MarkData, string>("IGNORE");
+
     public bool CanParseLine(string inputLine);
 
     public Result<MarkData, string> Parse(string inputLine);
