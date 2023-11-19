@@ -22,6 +22,8 @@ namespace CoordImporter
 
         private MainWindow MainWindow { get; init; }
 
+        private IHost host { get; init; }
+
         public Plugin(
             [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
             [RequiredVersion("1.0")] ICommandManager commandManager,
@@ -33,6 +35,7 @@ namespace CoordImporter
             builder.Services.AddSingleton(logger);
             builder.Services.AddSingleton(chat);
             builder.Services.AddSingleton(dataManager);
+            builder.Services.AddSingleton(pluginInterface);
             builder.Services.AddSingleton<IDataManagerManager, DataManagerManager>();
             builder.Services.AddSingleton<ITrackerParser, BearParser>();
             builder.Services.AddSingleton<ITrackerParser, FaloopParser>();
@@ -41,7 +44,9 @@ namespace CoordImporter
             builder.Services.AddSingleton<FaloopParser>();
             builder.Services.AddSingleton<SirenParser>();
             builder.Services.AddSingleton<Importer>();
-            using IHost host = builder.Build();
+            builder.Services.AddSingleton<MainWindow>();
+            builder.Services.AddSingleton<HuntHelperManager>();
+            host = builder.Build();
 
             PluginInterface = pluginInterface;
             CommandManager = commandManager;
@@ -63,6 +68,7 @@ namespace CoordImporter
             this.WindowSystem.RemoveAllWindows();
             MainWindow.Dispose();
             this.CommandManager.RemoveHandler(CommandName);
+            host.Dispose();
         }
 
         private void OnCommand(string command, string args)

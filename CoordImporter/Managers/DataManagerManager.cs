@@ -100,6 +100,8 @@ public class DataManagerManager : IDataManagerManager
                         $"Attempted to add map with name {placeName} for language {clientLanguage} but it already existed");
                 }
             }
+            DataManager.GameData.Excel.RemoveSheetFromCache<PlaceName>();
+            DataManager.GameData.Excel.RemoveSheetFromCache<TerritoryType>();
         }
 
         return mapDict.ToImmutableDictionary();
