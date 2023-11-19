@@ -6,7 +6,6 @@ using Dalamud.Plugin.Services;
 using NSubstitute;
 using NSubstitute.ReceivedExtensions;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

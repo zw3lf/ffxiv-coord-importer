@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using CoordImporter.Managers;
+﻿using CoordImporter.Managers;
 using CoordImporter.Parser;
 using CoordImporter.Windows;
 using Dalamud.Game.Command;
