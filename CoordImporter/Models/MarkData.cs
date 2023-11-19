@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace CoordImporter.Parser;
+namespace CoordImporter.Models;
 
 public record struct MarkData(
     string MarkName,

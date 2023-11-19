@@ -1,13 +1,17 @@
-﻿using CSharpFunctionalExtensions;
-using Dalamud.Game.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using CSharpFunctionalExtensions;
+using Dalamud.Game.Text;
+using Dalamud.Plugin;
 
 namespace CoordImporter;
 
 public static class Utils
 {
+    #region extentions
+
     public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Action<T> action)
     {
         var values = source.ToList();
@@ -32,4 +36,12 @@ public static class Utils
         instance is >= 1 and <= 9
             ? (SeIconChar.Instance1 + (int)instance! - 1).ToIconString()
             : string.Empty;
+
+    public static string DataFilePath(this DalamudPluginInterface pluginInterface, string dataFilename) => Path.Combine(
+        pluginInterface.AssemblyLocation.Directory?.FullName!,
+        "Data",
+        dataFilename
+    );
+
+    #endregion
 }

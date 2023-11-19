@@ -1,13 +1,13 @@
 using CoordImporter.Managers;
-using CoordImporter.Parser;
 using CSharpFunctionalExtensions;
 using Dalamud.Game.Text;
 using Dalamud.Plugin.Services;
 using NSubstitute;
 using NSubstitute.ReceivedExtensions;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Numerics;
+using CoordImporter.Models;
+using CoordImporter.Parsers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -70,6 +70,7 @@ namespace CoordImporter.Tests
             builder.Services.AddSingleton(_Chat);
             builder.Services.AddSingleton(_DataManager);
             builder.Services.AddSingleton(_DataManagerManager);
+            builder.Services.AddSingleton<ICiDataManager>(new CiDataManager(@"Data\CustomNames.json"));
             builder.Services.AddSingleton<ITrackerParser, BearParser>();
             builder.Services.AddSingleton<ITrackerParser, FaloopParser>();
             builder.Services.AddSingleton<ITrackerParser, SirenParser>();
@@ -154,6 +155,28 @@ namespace CoordImporter.Tests
             _DataManagerManager.Received(Quantity.Exactly(1)).GetMapDataByName(expected.MapName);
 
             Assert.That(actual, Is.EqualTo(Result.Success<MarkData, string>(expected)));
+        }
+
+        [Test]
+        public void ParsersCorrectMarkNames()
+        {
+            // DATA
+            var inputs = new Dictionary<ParserType, string>()
+            {
+                { ParserType.Siren, $@"(Zanigoh) {LinkChar}Thavnair{I2Char} ( 27.6 , 25.6 )  (Instance TWO) " },
+                { ParserType.Faloop, @"Odin [S]: Zanigoh - Thavnair (2) ( 27.6 , 25.6 )" },
+                { ParserType.Bear, @"Thavnair 2 ( 27.6 , 25.6 ) Zanigoh" },
+            };
+            var expected = new MarkData("Zanig'oh", "Thavnair", 1764, 219, 2, new Vector2(27.6f, 25.6f));
+            
+            Assert.Multiple(() =>
+            {
+                inputs.ForEach(test =>
+                {
+                    _DataManagerManager.ClearReceivedCalls();
+                    TestParsesSuccessfully(test.Key, test.Value, expected);
+                });
+            });
         }
 
         public enum ParserType

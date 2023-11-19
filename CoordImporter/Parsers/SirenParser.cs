@@ -1,13 +1,14 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
 using CoordImporter.Managers;
+using CoordImporter.Models;
 using CSharpFunctionalExtensions;
 using Dalamud.Game.Text;
 using Dalamud.Plugin.Services;
 
-namespace CoordImporter.Parser;
+namespace CoordImporter.Parsers;
 
-public class SirenParser : Parser
+public class SirenParser : BaseParser
 {
     private static readonly char LinkChar = SeIconChar.LinkMarker.ToIconChar();
     private static readonly char I1Char = SeIconChar.Instance1.ToIconChar();
@@ -28,5 +29,6 @@ public class SirenParser : Parser
 
     public override bool CanParseLine(string inputLine) => Regex.IsMatch(inputLine);
 
-    public SirenParser(IPluginLog logger, IDataManagerManager dataManagerManager) : base(logger, dataManagerManager) { }
+    public SirenParser(IPluginLog logger, IDataManagerManager dataManagerManager, ICiDataManager ciDataManager)
+        : base(logger, dataManagerManager, ciDataManager) { }
 }

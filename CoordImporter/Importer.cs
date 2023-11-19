@@ -1,9 +1,10 @@
-﻿using CoordImporter.Parser;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using CoordImporter.Models;
+using CoordImporter.Parsers;
 
 namespace CoordImporter;
 

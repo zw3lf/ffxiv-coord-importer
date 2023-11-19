@@ -1,11 +1,11 @@
-﻿using CoordImporter.Parser;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Ipc.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using CoordImporter.Models;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 

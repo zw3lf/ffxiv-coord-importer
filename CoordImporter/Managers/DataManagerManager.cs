@@ -1,5 +1,4 @@
-﻿using CoordImporter.Parser;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using Dalamud;
 using Dalamud.Plugin.Services;
 using Lumina.Excel;
@@ -8,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using CoordImporter.Models;
 
 namespace CoordImporter.Managers;
 

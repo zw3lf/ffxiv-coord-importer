@@ -1,12 +1,13 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
 using CoordImporter.Managers;
+using CoordImporter.Models;
 using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
 
-namespace CoordImporter.Parser;
+namespace CoordImporter.Parsers;
 
-public class FaloopParser : Parser
+public class FaloopParser : BaseParser
 {
     // For the format "Raiden [S]: Gamma - Yanxia ( 23.6, 11.4 )"
     protected readonly Regex Regex = new Regex(
@@ -23,5 +24,6 @@ public class FaloopParser : Parser
 
     public override bool CanParseLine(string inputLine) => Regex.IsMatch(inputLine);
 
-    public FaloopParser(IPluginLog logger, IDataManagerManager dataManagerManager) : base(logger, dataManagerManager) { }
+    public FaloopParser(IPluginLog logger, IDataManagerManager dataManagerManager, ICiDataManager ciDataManager)
+        : base(logger, dataManagerManager, ciDataManager) { }
 }

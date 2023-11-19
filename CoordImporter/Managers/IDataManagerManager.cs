@@ -1,8 +1,7 @@
-﻿using CoordImporter.Parser;
+﻿using CoordImporter.Models;
 using CSharpFunctionalExtensions;
 using Dalamud;
 using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets;
 
 namespace CoordImporter.Managers;
 

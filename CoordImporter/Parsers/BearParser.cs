@@ -1,12 +1,13 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
 using CoordImporter.Managers;
+using CoordImporter.Models;
 using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
 
-namespace CoordImporter.Parser;
+namespace CoordImporter.Parsers;
 
-public class BearParser : Parser
+public class BearParser : BaseParser
 {
     // For the format "Labyrinthos ( 16.5 , 16.8 ) Storsie"
     protected readonly Regex Regex = new Regex(
@@ -22,5 +23,6 @@ public class BearParser : Parser
 
     public override bool CanParseLine(string inputLine) => Regex.IsMatch(inputLine);
 
-    public BearParser(IPluginLog logger, IDataManagerManager dataManagerManager) : base(logger, dataManagerManager) { }
+    public BearParser(IPluginLog logger, IDataManagerManager dataManagerManager, ICiDataManager ciDataManager)
+        : base(logger, dataManagerManager, ciDataManager) { }
 }

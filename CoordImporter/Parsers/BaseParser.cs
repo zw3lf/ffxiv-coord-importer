@@ -4,11 +4,11 @@ using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
 using CoordImporter.Managers;
+using CoordImporter.Models;
 using CSharpFunctionalExtensions;
-using Dalamud.Game.Text;
 using Dalamud.Plugin.Services;
 
-namespace CoordImporter.Parser;
+namespace CoordImporter.Parsers;
 
 public interface ITrackerParser
 {
@@ -17,15 +17,17 @@ public interface ITrackerParser
     public Result<MarkData, string> Parse(string inputLine);
 }
 
-public abstract class Parser : ITrackerParser
+public abstract class BaseParser : ITrackerParser
 {
     private IPluginLog Logger { get; init; }
     private IDataManagerManager DataManagerManager { get; init; }
+    private ICiDataManager CiDataManager { get; init; }
 
-    protected Parser(IPluginLog logger, IDataManagerManager dataManagerManager)
+    protected BaseParser(IPluginLog logger, IDataManagerManager dataManagerManager, ICiDataManager ciDataManager)
     {
         Logger = logger;
         DataManagerManager = dataManagerManager;
+        CiDataManager = ciDataManager;
     }
 
     protected Result<MarkData, string> CreateMark(GroupCollection groups, Func<string, uint> instanceParser)
@@ -39,7 +41,7 @@ public abstract class Parser : ITrackerParser
                )
                .Map(map =>
                {
-                   var markName = groups["mark_name"].Value;
+                   var markName = CiDataManager.CorrectMarkName(groups["mark_name"].Value);
                    var x = float.Parse(groups["x_coord"].Value, CultureInfo.InvariantCulture);
                    var y = float.Parse(groups["y_coord"].Value, CultureInfo.InvariantCulture);
                    var instance = groups["instance"]

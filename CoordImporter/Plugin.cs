@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using CoordImporter.Managers;
-using CoordImporter.Parser;
+﻿using CoordImporter.Managers;
+using CoordImporter.Parsers;
 using CoordImporter.Windows;
 using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
@@ -35,6 +34,7 @@ namespace CoordImporter
             builder.Services.AddSingleton(chat);
             builder.Services.AddSingleton(dataManager);
             builder.Services.AddSingleton<IDataManagerManager, DataManagerManager>();
+            builder.Services.AddSingleton<ICiDataManager>(new CiDataManager(pluginInterface.DataFilePath("CustomNames.json")));
             builder.Services.AddSingleton<ITrackerParser, BearParser>();
             builder.Services.AddSingleton<ITrackerParser, FaloopParser>();
             builder.Services.AddSingleton<ITrackerParser, SirenParser>();
