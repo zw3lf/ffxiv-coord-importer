@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
+using Dalamud.Game.Text;
 using Dalamud.Plugin.Services;
 
 namespace CoordImporter.Windows;
@@ -85,7 +86,7 @@ public sealed class MainWindow : Window, IDisposable
             .ForEach(markDataResult =>
             {
                 markDataResult.Match(
-                    markData => Chat.Print(CreateMapLink(markData)),
+                    markData => Chat.Print(new XivChatEntry { Type = XivChatType.Echo, Name = "", Message = CreateMapLink(markData) }),
                     error => Chat.PrintError(error)
                 );
             });
