@@ -4,27 +4,42 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Dalamud.Plugin.Services;
 
 namespace CoordImporter;
 
 public class Importer
 {
-    public Importer(IEnumerable<ITrackerParser> parsers)
+    private readonly IPluginLog logger;
+    private readonly IList<ITrackerParser> parsers;
+    
+    public Importer(IPluginLog logger, IEnumerable<ITrackerParser> parsers)
     {
-        Parsers = parsers.ToImmutableList();
+        this.logger = logger;
+        this.parsers = parsers.ToImmutableList();
     }
-
-    private IList<ITrackerParser> Parsers;
 
     public IEnumerable<Result<MarkData, string>> ParsePayload(string payload) =>
         payload
             .Split(
                 new string[] { "\r\n", "\r", "\n" },
                 StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-            .Select(inputLine => Parsers
+            .Select(inputLine => parsers
                                  .FirstOrDefault(parser => parser.CanParseLine(inputLine))
                                  .ToResult($"Format not recognized for input: {inputLine}")
-                                 .Bind(parser => parser.Parse(inputLine))
+                                 .Bind(parser =>
+                                 {
+                                     try
+                                     {
+                                         return parser.Parse(inputLine);
+                                     }
+                                     catch (Exception e)
+                                     {
+                                         var message = $"An unexpected error occurred while parsing input: {inputLine}";
+                                         logger.Error(e, message);
+                                         return message;
+                                     }
+                                 })
             )
             .Where(result => !ITrackerParser.ParseErrorIgnoreMark.Equals(result))
             .ToImmutableList();
