@@ -35,7 +35,8 @@ public class DataManagerManager : IDataManagerManager
 
     public Maybe<uint> GetMobIdByName(string mobName)
     {
-        if (MobIdsByName.TryGetValue(mobName.ToLowerInvariant(), out var mobId)) return mobId;
+        // Bear and Siren have the apostrophe in different locations for Li'l Murderer, so just strip it out here
+        if (MobIdsByName.TryGetValue(mobName.ToLowerInvariant().Replace("'", ""), out var mobId)) return mobId;
         return Maybe.None;
     }
 
@@ -55,7 +56,8 @@ public class DataManagerManager : IDataManagerManager
                               .AsMaybe(() => Logger.Verbose($"Could not find BNpcName sheet for language: {clientLanguage}"))
                               .Select(nameSheet => nameSheet as IEnumerable<BNpcName>)
                               .GetValueOrDefault(new List<BNpcName>())
-                              .Select(name => ((uint RowId, string Name))(name.RowId, name.Singular.ToString().ToLowerInvariant()))
+                              // Bear and Siren have the apostrophe in different locations for Li'l Murderer, so just strip it out here
+                              .Select(name => ((uint RowId, string Name))(name.RowId, name.Singular.ToString().ToLowerInvariant().Replace("'", "")))
                               .ForEach(name =>
                                            Logger.Verbose("Found mobId [{0}] for name: {1}", name.RowId, name.Name)
                               );
