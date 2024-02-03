@@ -1,6 +1,6 @@
 # FFXIV Coordinate Importer
 
-Import map coordinates from various sources (e.g. Siren Hunts or Bear Toolkit) and dump them into echo chat.
+Import map coordinates from various sources (e.g. Siren Hunts, Bear Toolkit, or Faloop) and dump them into echo chat.
 
 ## To Use
 
