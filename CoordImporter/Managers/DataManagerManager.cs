@@ -52,15 +52,28 @@ public class DataManagerManager : IDataManagerManager
         {
             Logger.Verbose($"Loading mark names for language: {clientLanguage}");
 
-            return DataManager.GetExcelSheet<BNpcName>(clientLanguage)
-                              .AsMaybe(() => Logger.Verbose($"Could not find BNpcName sheet for language: {clientLanguage}"))
-                              .Select(nameSheet => nameSheet as IEnumerable<BNpcName>)
-                              .GetValueOrDefault(new List<BNpcName>())
-                              // Bear and Siren have the apostrophe in different locations for Li'l Murderer, so just strip it out here
-                              .Select(name => ((uint RowId, string Name))(name.RowId, name.Singular.ToString().ToLowerInvariant().Replace("'", "")))
-                              .ForEach(name =>
-                                           Logger.Verbose("Found mobId [{0}] for name: {1}", name.RowId, name.Name)
-                              );
+            var nmNameIds = DataManager
+                .GetExcelSheet<NotoriousMonster>()
+                .AsMaybe(() => Logger.Verbose($"Could not find NotoriousMonster sheet for language: {clientLanguage}"))
+                .Select(nmSheet => nmSheet as IEnumerable<NotoriousMonster>)
+                .GetValueOrDefault(new List<NotoriousMonster>())
+                .Select(notoriousMonster => notoriousMonster.BNpcName.Row)
+                .ToImmutableHashSet();
+
+            return DataManager
+                .GetExcelSheet<BNpcName>(clientLanguage)
+                .AsMaybe(() => Logger.Verbose($"Could not find BNpcName sheet for language: {clientLanguage}"))
+                .Select(nameSheet => nameSheet as IEnumerable<BNpcName>)
+                .GetValueOrDefault(new List<BNpcName>())
+                .Where(name => nmNameIds.Contains(name.RowId))
+                // Bear and Siren have the apostrophe in different locations for Li'l Murderer, so just strip it out here
+                .Select(name => (
+                        RowId: name.RowId,
+                        Name: name.Singular.ToString().ToLowerInvariant().Replace("'", "")
+                ))
+                .ForEach(name =>
+                             Logger.Verbose("Found mobId [{0}] for name: {1}", name.RowId, name.Name)
+                );
         })
         .Flatten()
         .DistinctBy(name => name.Name)
