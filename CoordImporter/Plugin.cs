@@ -25,11 +25,11 @@ namespace CoordImporter
         private IHost host { get; init; }
 
         public Plugin(
-            [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
-            [RequiredVersion("1.0")] ICommandManager commandManager,
-            [RequiredVersion("1.0")] IChatGui chat,
-            [RequiredVersion("1.0")] IDataManager dataManager,
-            [RequiredVersion("1.0")] IPluginLog logger)
+            DalamudPluginInterface pluginInterface,
+            ICommandManager commandManager,
+            IChatGui chat,
+            IDataManager dataManager,
+            IPluginLog logger)
         {
             HostApplicationBuilder builder = Host.CreateApplicationBuilder();
             builder.Services.AddSingleton(logger);
