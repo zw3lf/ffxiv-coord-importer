@@ -1,6 +1,7 @@
 ﻿using CoordImporter.Parser;
 using CSharpFunctionalExtensions;
 using Dalamud;
+using Dalamud.Game;
 using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
 

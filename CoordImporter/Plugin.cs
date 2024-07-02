@@ -16,7 +16,7 @@ namespace CoordImporter
         public string Name => "Coordinate Importer";
         private const string CommandName = "/ci";
 
-        private DalamudPluginInterface PluginInterface { get; init; }
+        private IDalamudPluginInterface PluginInterface { get; init; }
         private ICommandManager CommandManager { get; init; }
         private WindowSystem WindowSystem { get; } = new WindowSystem("CoordinateImporter");
 
@@ -25,7 +25,7 @@ namespace CoordImporter
         private IHost host { get; init; }
 
         public Plugin(
-            DalamudPluginInterface pluginInterface,
+            IDalamudPluginInterface pluginInterface,
             ICommandManager commandManager,
             IChatGui chat,
             IDataManager dataManager,

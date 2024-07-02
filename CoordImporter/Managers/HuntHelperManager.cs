@@ -26,7 +26,7 @@ public class HuntHelperManager : IDisposable
 
     public bool Available { get; private set; } = false;
 
-    public HuntHelperManager(DalamudPluginInterface pluginInterface, IPluginLog logger, IDataManagerManager dataManagerManager, IChatGui chat)
+    public HuntHelperManager(IDalamudPluginInterface pluginInterface, IPluginLog logger, IDataManagerManager dataManagerManager, IChatGui chat)
     {
         Logger = logger;
         DataManagerManager = dataManagerManager;

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Dalamud.Game;
 
 namespace CoordImporter.Managers;
 
