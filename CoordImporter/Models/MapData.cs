@@ -1,4 +1,4 @@
-﻿namespace CoordImporter.Parser;
+﻿namespace CoordImporter.Models;
 
 public record struct MapData(
     uint TerritoryId,

@@ -1,9 +1,8 @@
 ﻿using CoordImporter.Managers;
-using CoordImporter.Parser;
+using CoordImporter.Parsers;
 using CoordImporter.Windows;
 using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
-using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,9 +39,11 @@ namespace CoordImporter
             builder.Services.AddSingleton<ITrackerParser, BearParser>();
             builder.Services.AddSingleton<ITrackerParser, FaloopParser>();
             builder.Services.AddSingleton<ITrackerParser, SirenParser>();
+            builder.Services.AddSingleton<ITrackerParser, TurtleParser>();
             builder.Services.AddSingleton<BearParser>();
             builder.Services.AddSingleton<FaloopParser>();
             builder.Services.AddSingleton<SirenParser>();
+            builder.Services.AddSingleton<TurtleParser>();
             builder.Services.AddSingleton<Importer>();
             builder.Services.AddSingleton<MainWindow>();
             builder.Services.AddSingleton<HuntHelperManager>();

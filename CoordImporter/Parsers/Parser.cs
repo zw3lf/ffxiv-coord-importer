@@ -4,11 +4,11 @@ using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
 using CoordImporter.Managers;
+using CoordImporter.Models;
 using CSharpFunctionalExtensions;
-using Dalamud.Game.Text;
 using Dalamud.Plugin.Services;
 
-namespace CoordImporter.Parser;
+namespace CoordImporter.Parsers;
 
 public interface ITrackerParser
 {
