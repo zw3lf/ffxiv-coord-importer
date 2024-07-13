@@ -1,6 +1,4 @@
-﻿using CoordImporter.Parser;
-using CSharpFunctionalExtensions;
-using Dalamud;
+﻿using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
 using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
@@ -8,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using CoordImporter.Models;
 using Dalamud.Game;
 
 namespace CoordImporter.Managers;

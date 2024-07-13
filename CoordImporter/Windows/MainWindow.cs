@@ -1,5 +1,4 @@
 using CoordImporter.Managers;
-using CoordImporter.Parser;
 using CSharpFunctionalExtensions;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
@@ -12,6 +11,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
+using CoordImporter.Models;
 using Dalamud.Game.Text;
 using Dalamud.Plugin.Services;
 
