@@ -14,7 +14,7 @@ public class BearParser : Parser
     
     // For the format "Labyrinthos ( 16.5 , 16.8 ) Storsie"
     protected readonly Regex Regex = new Regex(
-        @"(?<map_name>[\D'\s-]+)\s*(?<instance>[1-9]?)\s*\(\s*((?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)|NOT AVAILABLE)\s*\)\s*(?<mark_name>\w[\w '-]+)",
+        @"(?<map_name>[\w'\s-^@]*?[\D'\s-^@]+)\s*(?<instance>[1-9]?)\s*\(\s*((?<x_coord>[0-9\.]+)\s*,\s*(?<y_coord>[0-9\.]+)|NOT AVAILABLE)\s*\)\s*(?<mark_name>\w[\w '-]+)",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public override Result<MarkData, string> Parse(string inputLine)

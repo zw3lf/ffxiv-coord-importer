@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
 using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -28,9 +28,9 @@ public class DataManagerManager : IDataManagerManager
         MapDataByName = LoadMapData();
     }
 
-    public ExcelSheet<T>? GetExcelSheet<T>() where T : ExcelRow => DataManager.GetExcelSheet<T>();
+    public ExcelSheet<T>? GetExcelSheet<T>() where T : struct, IExcelRow<T> => DataManager.GetExcelSheet<T>();
 
-    public ExcelSheet<T>? GetExcelSheet<T>(ClientLanguage clientLanguage) where T : ExcelRow =>
+    public ExcelSheet<T>? GetExcelSheet<T>(ClientLanguage clientLanguage) where T : struct, IExcelRow<T> =>
         DataManager.GetExcelSheet<T>(clientLanguage);
 
     public Maybe<uint> GetMobIdByName(string mobName)
@@ -57,7 +57,7 @@ public class DataManagerManager : IDataManagerManager
                 .AsMaybe(() => Logger.Verbose($"Could not find NotoriousMonster sheet for language: {clientLanguage}"))
                 .Select(nmSheet => nmSheet as IEnumerable<NotoriousMonster>)
                 .GetValueOrDefault(new List<NotoriousMonster>())
-                .Select(notoriousMonster => notoriousMonster.BNpcName.Row)
+                .Select(notoriousMonster => notoriousMonster.BNpcName.Value)
                 .ToImmutableHashSet();
 
             return DataManager
@@ -65,7 +65,7 @@ public class DataManagerManager : IDataManagerManager
                 .AsMaybe(() => Logger.Verbose($"Could not find BNpcName sheet for language: {clientLanguage}"))
                 .Select(nameSheet => nameSheet as IEnumerable<BNpcName>)
                 .GetValueOrDefault(new List<BNpcName>())
-                .Where(name => nmNameIds.Contains(name.RowId))
+                .Where(name => nmNameIds.Contains(name))
                 // Bear and Siren have the apostrophe in different locations for Li'l Murderer, so just strip it out here
                 .Select(name => (
                         RowId: name.RowId,
@@ -98,15 +98,15 @@ public class DataManagerManager : IDataManagerManager
 
             foreach (var territory in territorySheet)
             {
-                var placeNameValue = placeSheet.GetRow(territory.PlaceName.Row);
+                var placeNameValue = placeSheet.GetRowOrDefault(territory.PlaceName.RowId);
                 if (placeNameValue == null)
                 {
                     Logger.Verbose("Failed to load PlaceName");
                     continue;
                 }
-                var placeName = placeNameValue.Name.ToString().ToLowerInvariant();
+                var placeName = placeNameValue.Value.Name.ToString().ToLowerInvariant();
 
-                var mapData = new MapData(territory.RowId, territory.Map.Row);
+                var mapData = new MapData(territory.RowId, territory.Map.RowId);
 
                 Logger.Verbose($"Adding map with name {placeName} with language {clientLanguage}");
                 if (!mapDict.TryAdd(placeName, mapData))
@@ -115,8 +115,6 @@ public class DataManagerManager : IDataManagerManager
                         $"Attempted to add map with name {placeName} for language {clientLanguage} but it already existed");
                 }
             }
-            DataManager.GameData.Excel.RemoveSheetFromCache<PlaceName>();
-            DataManager.GameData.Excel.RemoveSheetFromCache<TerritoryType>();
         }
 
         return mapDict.ToImmutableDictionary();

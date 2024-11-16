@@ -8,8 +8,8 @@ namespace CoordImporter.Managers;
 public interface IDataManagerManager
 {
     #region lumina methods
-    ExcelSheet<T>? GetExcelSheet<T>() where T : ExcelRow;
-    ExcelSheet<T>? GetExcelSheet<T>(ClientLanguage clientLanguage) where T : ExcelRow;
+    ExcelSheet<T>? GetExcelSheet<T>() where T : struct, IExcelRow<T>;
+    ExcelSheet<T>? GetExcelSheet<T>(ClientLanguage clientLanguage) where T : struct, IExcelRow<T>;
     #endregion
     
     Maybe<uint> GetMobIdByName(string mobName);
