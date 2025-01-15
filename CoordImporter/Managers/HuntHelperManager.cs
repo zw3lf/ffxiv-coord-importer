@@ -78,7 +78,7 @@ public class HuntHelperManager : IDisposable
                 Available = false;
             }
         }
-        catch (IpcNotReadyError e)
+        catch (IpcNotReadyError)
         {
             Logger.Info("Hunt Helper is not yet available. Disabling support until it is.");
             Available = false;
@@ -109,7 +109,7 @@ public class HuntHelperManager : IDisposable
         {
             ipcAction.Invoke();
         }
-        catch (IpcNotReadyError e)
+        catch (IpcNotReadyError)
         {
             Logger.Warning(
                 "Hunt Helper appears to have disappeared ;-;. Can't complete the operation ;-;. Disabling support until it comes back."

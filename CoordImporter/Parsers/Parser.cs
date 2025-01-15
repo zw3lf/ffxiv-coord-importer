@@ -31,7 +31,7 @@ public abstract class Parser : ITrackerParser
         DataManagerManager = dataManagerManager;
     }
 
-    protected Result<MarkData, string> CreateMark(GroupCollection groups, Func<string, uint> instanceParser)
+    protected Result<MarkData, string> CreateMark(string inputLine, GroupCollection groups, Func<string, uint> instanceParser)
     {
         var mapName = groups["map_name"].Value.Trim();
         return DataManagerManager
@@ -53,7 +53,7 @@ public abstract class Parser : ITrackerParser
                                   .Select(instance => (uint?)instanceParser.Invoke(instance!))
                                   .GetValueOrDefault();
 
-                   return new MarkData(markName, mapName, map.TerritoryId, map.RowId, instance, new Vector2(x, y));
+                   return new MarkData(inputLine, markName, mapName, map.TerritoryId, map.RowId, instance, new Vector2(x, y));
                });
     }
 
