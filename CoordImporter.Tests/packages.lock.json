@@ -10,11 +10,11 @@
       },
       "DitzyExtensions": {
         "type": "Direct",
-        "requested": "[1.0.1, )",
-        "resolved": "1.0.1",
-        "contentHash": "WBuAIf9yDViR8MNWP3iKSHsScVCbmv3jqPSoko+7MND/fS1X6Iu2uEjw9oedA0x1akLOrL+j328spKHg/A4npw==",
+        "requested": "[1.3.1, )",
+        "resolved": "1.3.1",
+        "contentHash": "gwFmEGtNEjrEs5CGGs85kRlwC8Yte9aS320JU4fbPh6KvM9cOCMGFr+HJM4cO3RI5HWGMNFgRLWmLJuVMtEmhw==",
         "dependencies": {
-          "CSharpFunctionalExtensions": "2.42.5"
+          "CSharpFunctionalExtensions": "3.5.1"
         }
       },
       "DotNet.ReproducibleBuilds": {
@@ -89,8 +89,8 @@
       },
       "CSharpFunctionalExtensions": {
         "type": "Transitive",
-        "resolved": "2.42.5",
-        "contentHash": "Do9Q7Nyfx2G4HRt96aB6yoP5Z9ic3jqBHLrf35tULzsWlFoBlkQZT62aXCiv7UmVmF56OUR+a3JoSSs140hfHQ=="
+        "resolved": "3.5.1",
+        "contentHash": "J9wNzOzRdc4pfO3WREYR19zjp585y7/y9TKQXKkbxxnXt7N6h2Q8AjP0+bayrgRVxpU9COaFMA8961xbptYsUg=="
       },
       "DalamudPackager": {
         "type": "Transitive",
@@ -468,12 +468,22 @@
           "System.Text.Encodings.Web": "7.0.0"
         }
       },
+      "XIVHuntUtils": {
+        "type": "Transitive",
+        "resolved": "1.3.2",
+        "contentHash": "o51aO28v0ANb1Pwlgxqp6IKZRUjyK3JaSgDKhZdXS8m/W7biKFoOFI2rTqySkfAheg77WpDzo/B4IiAD3/6teA==",
+        "dependencies": {
+          "CSharpFunctionalExtensions": "3.5.1",
+          "DitzyExtensions": "1.3.1"
+        }
+      },
       "coordimporter": {
         "type": "Project",
         "dependencies": {
-          "CSharpFunctionalExtensions": "[2.40.3, )",
           "DalamudPackager": "[12.0.0, )",
-          "Microsoft.Extensions.Hosting": "[7.0.1, )"
+          "DitzyExtensions": "[1.3.1, )",
+          "Microsoft.Extensions.Hosting": "[7.0.1, )",
+          "XIVHuntUtils": "[1.3.2, )"
         }
       }
     }

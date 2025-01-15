@@ -2,17 +2,20 @@
   "version": 1,
   "dependencies": {
     "net9.0-windows7.0": {
-      "CSharpFunctionalExtensions": {
-        "type": "Direct",
-        "requested": "[2.40.3, )",
-        "resolved": "2.40.3",
-        "contentHash": "G+t+bf39aixVFN3O3Q5LoE0zy3o8QlV3mv3ATw76XwDRWkE9eFRLzZdx9HH9fgbPpasfP4kr8cnnXIP+Z7GcrQ=="
-      },
       "DalamudPackager": {
         "type": "Direct",
         "requested": "[12.0.0, )",
         "resolved": "12.0.0",
         "contentHash": "J5TJLV3f16T/E2H2P17ClWjtfEBPpq3yxvqW46eN36JCm6wR+EaoaYkqG9Rm5sHqs3/nK/vKjWWyvEs/jhKoXw=="
+      },
+      "DitzyExtensions": {
+        "type": "Direct",
+        "requested": "[1.3.1, )",
+        "resolved": "1.3.1",
+        "contentHash": "gwFmEGtNEjrEs5CGGs85kRlwC8Yte9aS320JU4fbPh6KvM9cOCMGFr+HJM4cO3RI5HWGMNFgRLWmLJuVMtEmhw==",
+        "dependencies": {
+          "CSharpFunctionalExtensions": "3.5.1"
+        }
       },
       "DotNet.ReproducibleBuilds": {
         "type": "Direct",
@@ -49,6 +52,21 @@
           "Microsoft.Extensions.Options": "7.0.1",
           "System.Diagnostics.DiagnosticSource": "7.0.1"
         }
+      },
+      "XIVHuntUtils": {
+        "type": "Direct",
+        "requested": "[1.3.2, )",
+        "resolved": "1.3.2",
+        "contentHash": "o51aO28v0ANb1Pwlgxqp6IKZRUjyK3JaSgDKhZdXS8m/W7biKFoOFI2rTqySkfAheg77WpDzo/B4IiAD3/6teA==",
+        "dependencies": {
+          "CSharpFunctionalExtensions": "3.5.1",
+          "DitzyExtensions": "1.3.1"
+        }
+      },
+      "CSharpFunctionalExtensions": {
+        "type": "Transitive",
+        "resolved": "3.5.1",
+        "contentHash": "J9wNzOzRdc4pfO3WREYR19zjp585y7/y9TKQXKkbxxnXt7N6h2Q8AjP0+bayrgRVxpU9COaFMA8961xbptYsUg=="
       },
       "Microsoft.Extensions.Configuration": {
         "type": "Transitive",
