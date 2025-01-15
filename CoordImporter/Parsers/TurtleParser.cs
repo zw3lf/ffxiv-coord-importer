@@ -25,7 +25,7 @@ public class TurtleParser : Parser
     {
         var groups = Regex.Matches(inputLine).First().Groups;
         LogParse("Turtle", inputLine, groups);
-        return CreateMark(groups, instance => (uint)(instance.First() - I1Char) + 1);
+        return CreateMark(inputLine, groups, instance => (uint)(instance.First() - I1Char) + 1);
     }
 
     public override bool CanParseLine(string inputLine) => Regex.IsMatch(inputLine);

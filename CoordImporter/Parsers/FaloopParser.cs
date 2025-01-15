@@ -19,7 +19,7 @@ public class FaloopParser : Parser
     {
         var groups = Regex.Matches(inputLine).First().Groups;
         LogParse("Faloop", inputLine, groups);
-        return CreateMark(groups, instance => (uint)(instance.First() - '0'));
+        return CreateMark(inputLine, groups, instance => (uint)(instance.First() - '0'));
     }
 
     public override bool CanParseLine(string inputLine) => Regex.IsMatch(inputLine);

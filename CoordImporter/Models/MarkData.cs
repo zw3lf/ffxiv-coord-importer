@@ -3,6 +3,7 @@
 namespace CoordImporter.Models;
 
 public record struct MarkData(
+    string RawText,
     string MarkName,
     string MapName,
     uint TerritoryId,
