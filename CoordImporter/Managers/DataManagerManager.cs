@@ -53,11 +53,11 @@ public class DataManagerManager : IDataManagerManager
             Logger.Verbose($"Loading mark names for language: {clientLanguage}");
 
             var nmNameIds = DataManager
-                .GetExcelSheet<NotoriousMonster>()
+                .GetExcelSheet<NotoriousMonster>(clientLanguage)
                 .AsMaybe(() => Logger.Verbose($"Could not find NotoriousMonster sheet for language: {clientLanguage}"))
                 .Select(nmSheet => nmSheet as IEnumerable<NotoriousMonster>)
                 .GetValueOrDefault(new List<NotoriousMonster>())
-                .Select(notoriousMonster => notoriousMonster.BNpcName.Value)
+                .Select(notoriousMonster => notoriousMonster.BNpcName.RowId)
                 .ToImmutableHashSet();
 
             return DataManager
@@ -65,14 +65,14 @@ public class DataManagerManager : IDataManagerManager
                 .AsMaybe(() => Logger.Verbose($"Could not find BNpcName sheet for language: {clientLanguage}"))
                 .Select(nameSheet => nameSheet as IEnumerable<BNpcName>)
                 .GetValueOrDefault(new List<BNpcName>())
-                .Where(name => nmNameIds.Contains(name))
+                .Where(name => nmNameIds.Contains(name.RowId))
                 // Bear and Siren have the apostrophe in different locations for Li'l Murderer, so just strip it out here
                 .Select(name => (
                         RowId: name.RowId,
                         Name: name.Singular.ToString().ToLowerInvariant().Replace("'", "")
                 ))
                 .ForEach(name =>
-                             Logger.Verbose("Found mobId [{0}] for name: {1}", name.RowId, name.Name)
+                             Logger.Verbose("Language: {0}: Found mobId [{1}] for name: {2}", clientLanguage, name.RowId, name.Name)
                 );
         })
         .Flatten()
