@@ -36,7 +36,7 @@ public class DataManagerManager : IDataManagerManager
     public Maybe<uint> GetMobIdByName(string mobName)
     {
         // Bear and Siren have the apostrophe in different locations for Li'l Murderer, so just strip it out here
-        if (MobIdsByName.TryGetValue(mobName.ToLowerInvariant().Replace("'", ""), out var mobId)) return mobId;
+        if (MobIdsByName.TryGetValue(mobName.ToLowerInvariant().Trim().Replace("'", ""), out var mobId)) return mobId;
         return Maybe.None;
     }
 
