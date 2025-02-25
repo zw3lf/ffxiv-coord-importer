@@ -14,7 +14,6 @@ using System.Numerics;
 using System.Text;
 using CoordImporter.Models;
 using Dalamud.Game.Text;
-using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
 using DitzyExtensions.Collection;
 using DitzyExtensions.Functional;
@@ -175,27 +174,51 @@ public sealed class MainWindow : Window, IDisposable
         });
 
         var newText = new StringBuilder();
+        var pathMessage = new StringBuilder("optimal hunt path:");
         territoryOrder.ForEach(territoryId =>
         {
             Vector3? previousPos = null;
-            marksByTerritory[territoryId]
+            var territoryPathSegments = marksByTerritory[territoryId]
                 .Sort((a, b) => Math.Sign(a.DistanceFromNearestAetheryte - b.DistanceFromNearestAetheryte))
-                .ForEach(mark =>
+                .SelectMany(mark =>
                 {
+                    var pathSegments = new List<string>(3);
                     var fromAetheryte = previousPos is null || (previousPos - mark.SpawnPoint).Value.LengthSquared() <
                         mark.DistanceFromNearestAetheryte;
                     if (fromAetheryte)
                     {
-                        var message = $"{mark.MarkData.MarkName} | {mark.TravelNode.StartingAetheryte.Name}";
-                        if (!mark.TravelNode.IsAetheryte) message += $" -> {mark.TravelNode.Path}";
-                        Chat.Print(message);
+                        pathSegments.Add($"teleport ({mark.TravelNode.StartingAetheryte.Name})");
+                        if (!mark.TravelNode.IsAetheryte) pathSegments.Add($"{mark.TravelNode.Path}");
                     }
 
-                    newText.AppendLine(mark.MarkData.RawText);
+                    var markPos = mark.MarkData.Position;
+                    pathSegments.Add($"{mark.MarkData.MarkName} ({markPos.X}, {markPos.Y})");
                     previousPos = mark.SpawnPoint;
-                });
+                    
+                    newText.AppendLine(mark.MarkData.RawText);
+
+                    return pathSegments;
+                })
+                .AsList();
+            
+            territoryPathSegments.ForEach((segment, i) =>
+            {
+                pathMessage.Append('\n');
+                if (i == territoryPathSegments.Count - 1)
+                {
+                    pathMessage.Append("┗ ");
+                }
+                else if (0 < i)
+                {
+                    pathMessage.Append("┣ ");
+                }
+                
+                pathMessage.Append(segment);
+            });
         });
 
+        Chat.Print(pathMessage.ToString());
+        
         textBuffer = newText.ToString();
     }
 
