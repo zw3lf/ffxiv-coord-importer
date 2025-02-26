@@ -14,6 +14,7 @@ using System.Numerics;
 using System.Text;
 using CoordImporter.Models;
 using Dalamud.Game.Text;
+using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
 using DitzyExtensions.Collection;
 using DitzyExtensions.Functional;
@@ -60,7 +61,7 @@ public sealed class MainWindow : Window, IDisposable
     public override void Draw()
     {
         ImGui.Spacing();
-        if (ImGui.Button("Import", new Vector2(80, 24)))
+        if (ImGui.Button("Import"))
         {
             PerformImport(textBuffer);
         }
@@ -82,13 +83,22 @@ public sealed class MainWindow : Window, IDisposable
             SortByAetheryte(textBuffer);
         }
 
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.BeginTooltip();
+            ImGui.PushTextWrapPos(160 * ImGuiHelpers.GlobalScale);
+            ImGui.Text("Sort the list of marks by proximity to the nearest aetheryte. Does not change the order of maps, just the marks within each map.");
+            ImGui.PopTextWrapPos();
+            ImGui.EndTooltip();
+        }
+
         ImGui.SameLine();
-        ImGui.Dummy(new Vector2(24.0f, 0.0f));
-        ImGui.SameLine();
-        if (ImGui.Button("Clean", new Vector2(80, 24)))
+        ImGui.SetCursorPosX(ImGui.GetWindowContentRegionMax().X - ImGuiHelpers.GetButtonSize("Clean").X);
+        if (ImGui.Button("Clean"))
         {
             textBuffer = "";
         }
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Clear the paste window of text");
 
         ImGui.Text("Paste Coordinates:");
         ImGui.Indent(10);
@@ -101,7 +111,7 @@ public sealed class MainWindow : Window, IDisposable
             availableSpace.Y - padding.Y
         );
 
-        ImGui.InputTextMultiline("", ref textBuffer, 16384, dynamicSize, ImGuiInputTextFlags.None);
+        ImGui.InputTextMultiline("##", ref textBuffer, 16384, dynamicSize, ImGuiInputTextFlags.None);
     }
 
     private void PerformImport(string payload)
@@ -183,7 +193,7 @@ public sealed class MainWindow : Window, IDisposable
                 .SelectMany(mark =>
                 {
                     var pathSegments = new List<string>(3);
-                    var fromAetheryte = previousPos is null || (previousPos - mark.SpawnPoint).Value.LengthSquared() <
+                    var fromAetheryte = previousPos is null || (previousPos - mark.SpawnPoint).Value.Length() >
                         mark.DistanceFromNearestAetheryte;
                     if (fromAetheryte)
                     {
