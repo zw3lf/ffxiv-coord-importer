@@ -7,6 +7,7 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using XIVHuntUtils.Managers;
 
 namespace CoordImporter
 {
@@ -21,7 +22,7 @@ namespace CoordImporter
 
         private MainWindow MainWindow { get; init; }
 
-        private IHost host { get; init; }
+        private ServiceProvider ServiceProvider { get; init; }
 
         public Plugin(
             IDalamudPluginInterface pluginInterface,
@@ -30,29 +31,36 @@ namespace CoordImporter
             IDataManager dataManager,
             IPluginLog logger)
         {
-            HostApplicationBuilder builder = Host.CreateApplicationBuilder();
-            builder.Services.AddSingleton(logger);
-            builder.Services.AddSingleton(chat);
-            builder.Services.AddSingleton(dataManager);
-            builder.Services.AddSingleton(pluginInterface);
-            builder.Services.AddSingleton<IDataManagerManager, DataManagerManager>();
-            builder.Services.AddSingleton<ITrackerParser, BearParser>();
-            builder.Services.AddSingleton<ITrackerParser, FaloopParser>();
-            builder.Services.AddSingleton<ITrackerParser, SirenParser>();
-            builder.Services.AddSingleton<ITrackerParser, TurtleParser>();
-            builder.Services.AddSingleton<BearParser>();
-            builder.Services.AddSingleton<FaloopParser>();
-            builder.Services.AddSingleton<SirenParser>();
-            builder.Services.AddSingleton<TurtleParser>();
-            builder.Services.AddSingleton<Importer>();
-            builder.Services.AddSingleton<MainWindow>();
-            builder.Services.AddSingleton<HuntHelperManager>();
-            host = builder.Build();
+            ServiceProvider = new ServiceCollection()
+                .AddSingleton(logger)
+                .AddSingleton(chat)
+                .AddSingleton(dataManager)
+                .AddSingleton(pluginInterface)
+                .AddSingleton<IDataManagerManager, DataManagerManager>()
+                .AddSingleton<IMobManager, MobManager>()
+                .AddSingleton<ITerritoryManager, TerritoryManager>()
+                .AddSingleton<ITravelManager, TravelManager>()
+                .AddSingleton<IHuntManager, HuntManager>()
+                .AddSingleton<ITrackerParser, BearParser>()
+                .AddSingleton<ITrackerParser, FaloopParser>()
+                .AddSingleton<ITrackerParser, SirenParser>()
+                .AddSingleton<ITrackerParser, TurtleParser>()
+                .AddSingleton<BearParser>()
+                .AddSingleton<FaloopParser>()
+                .AddSingleton<SirenParser>()
+                .AddSingleton<TurtleParser>()
+                .AddSingleton<Importer>()
+                .AddSingleton<MainWindow>()
+                .AddSingleton<HuntHelperManager>()
+                .AddSingleton<InitializationManager>()
+                .BuildServiceProvider();
 
             PluginInterface = pluginInterface;
             CommandManager = commandManager;
+            
+            ServiceProvider.GetService<InitializationManager>()!.InitializeNecessaryComponents();
 
-            MainWindow = host.Services.GetService<MainWindow>()!;
+            MainWindow = ServiceProvider.GetService<MainWindow>()!;
 
             WindowSystem.AddWindow(MainWindow);
 
@@ -69,7 +77,7 @@ namespace CoordImporter
             this.WindowSystem.RemoveAllWindows();
             MainWindow.Dispose();
             this.CommandManager.RemoveHandler(CommandName);
-            host.Dispose();
+            ServiceProvider.Dispose();
         }
 
         private void OnCommand(string command, string args)

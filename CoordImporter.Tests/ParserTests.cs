@@ -184,6 +184,6 @@ namespace CoordImporter.Tests
         uint? Instance = null)
     {
         public MarkData ToMarkData(uint territoryId, uint mapId) =>
-            new(MarkName, MapName, territoryId, mapId, Instance, Position);
+            new(InputLine, MarkName, MapName, territoryId, mapId, Instance, Position);
     }
 }

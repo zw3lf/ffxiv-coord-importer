@@ -24,7 +24,7 @@ public class SirenParser : Parser
     {
         var groups = Regex.Matches(inputLine).First().Groups;
         LogParse("Siren", inputLine, groups);
-        return CreateMark(groups, instance => (uint)(instance.First() - I1Char) + 1);
+        return CreateMark(inputLine, groups, instance => (uint)(instance.First() - I1Char) + 1);
     }
 
     public override bool CanParseLine(string inputLine) => Regex.IsMatch(inputLine);
