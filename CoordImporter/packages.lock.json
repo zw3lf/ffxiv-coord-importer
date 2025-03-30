@@ -4,9 +4,9 @@
     "net10.0-windows7.0": {
       "CSharpFunctionalExtensions": {
         "type": "Direct",
-        "requested": "[3.6.0, )",
-        "resolved": "3.6.0",
-        "contentHash": "c+oWbfDKKjpOLPMxn/iPn1GL24YTJMtOiGfj0AsDKZ2v6/Mr6V7BfzfWLg6KqNRx3KRy3KcQE680SwvDTI/jcg=="
+        "requested": "[3.5.1, )",
+        "resolved": "3.5.1",
+        "contentHash": "J9wNzOzRdc4pfO3WREYR19zjp585y7/y9TKQXKkbxxnXt7N6h2Q8AjP0+bayrgRVxpU9COaFMA8961xbptYsUg=="
       },
       "DalamudPackager": {
         "type": "Direct",
@@ -67,11 +67,6 @@
           "CSharpFunctionalExtensions": "3.5.1",
           "DitzyExtensions": "1.3.1"
         }
-      },
-      "CSharpFunctionalExtensions": {
-        "type": "Transitive",
-        "resolved": "3.5.1",
-        "contentHash": "J9wNzOzRdc4pfO3WREYR19zjp585y7/y9TKQXKkbxxnXt7N6h2Q8AjP0+bayrgRVxpU9COaFMA8961xbptYsUg=="
       },
       "Microsoft.Extensions.Configuration": {
         "type": "Transitive",

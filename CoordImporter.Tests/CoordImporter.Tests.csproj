@@ -5,15 +5,24 @@
         <DalamudLibPath Condition="$([MSBuild]::IsOSPlatform('Linux'))">$(HOME)/.xlcore/dalamud/Hooks/dev/</DalamudLibPath>
         <DalamudLibPath Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(HOME)/Library/Application Support/XIV on Mac/dalamud/Hooks/dev/</DalamudLibPath>
         <DalamudLibPath Condition="$(DALAMUD_HOME) != ''">$(DALAMUD_HOME)/</DalamudLibPath>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
-    
+
     <PropertyGroup>
+        <TargetFramework>net9.0-windows</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <AssemblySearchPaths>$(AssemblySearchPaths);$(DalamudLibPath)</AssemblySearchPaths>
+
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
+        <AssemblySearchPaths>$(AssemblySearchPaths);$(DalamudLibPath)</AssemblySearchPaths>
     </PropertyGroup>
+
+    <ItemGroup Label="DalamudDependencies">
+        <Reference Include="Dalamud"/>
+        <Reference Include="Lumina"/>
+        <Reference Include="Lumina.Excel"/>
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="DitzyExtensions" Version="1.3.1" />
@@ -24,7 +33,6 @@
         <PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
         <PackageReference Include="NUnit.Analyzers" Version="3.6.1" />
         <PackageReference Include="coverlet.collector" Version="3.2.0" />
-        <PackageReference Include="Serilog" Version="4.0.0" />
         <PackageReference Remove="DalamudPackager" />
     </ItemGroup>
 
