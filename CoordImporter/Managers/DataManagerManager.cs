@@ -43,6 +43,7 @@ public class DataManagerManager : IDataManagerManager
     public Maybe<MapData> GetMapDataByName(string mapName)
     {
         if (MapDataByName.TryGetValue(mapName.ToLowerInvariant(), out var map)) return map;
+        Logger.Verbose($"Map Name: {mapName}");
         return Maybe.None;
     }
 
