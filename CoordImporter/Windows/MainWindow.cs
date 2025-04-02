@@ -9,8 +9,10 @@ using Dalamud.Bindings.ImGui;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
+using System.Reflection.Metadata;
 using System.Text;
 using CoordImporter.Models;
 using Dalamud.Game.Text;
@@ -18,6 +20,7 @@ using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
 using DitzyExtensions.Collection;
 using DitzyExtensions.Functional;
+using Serilog.Configuration;
 using XIVHuntUtils.Managers;
 using XIVHuntUtils.Models;
 
@@ -31,6 +34,7 @@ public sealed class MainWindow : Window, IDisposable
     private HuntHelperManager HuntHelperManager;
     private IHuntManager HuntManager;
     private ITravelManager TravelManager;
+    private IDataManagerManager DataManagerManager;
 
     private string textBuffer = string.Empty;
 
@@ -40,7 +44,8 @@ public sealed class MainWindow : Window, IDisposable
         Importer importer,
         HuntHelperManager huntHelperManager,
         IHuntManager huntManager,
-        ITravelManager travelManager
+        ITravelManager travelManager,
+        IDataManagerManager dataManagerManager
     ) : base("Coordinate Importer")
     {
         this.SizeConstraints = new WindowSizeConstraints
@@ -54,6 +59,7 @@ public sealed class MainWindow : Window, IDisposable
         HuntHelperManager = huntHelperManager;
         HuntManager = huntManager;
         TravelManager = travelManager;
+        DataManagerManager = dataManagerManager;
     }
 
     public void Dispose() { }
@@ -122,7 +128,7 @@ public sealed class MainWindow : Window, IDisposable
             {
                 markDataResult.Match(
                     markData => Chat.Print(new XivChatEntry
-                        { Type = XivChatType.Echo, Name = "", Message = CreateMapLink(markData) }),
+                        { Type = XivChatType.Echo, Name = "", Message = new SeString(CreateMapLink(markData)) }),
                     error => Chat.PrintError(error)
                 );
             });
@@ -168,77 +174,99 @@ public sealed class MainWindow : Window, IDisposable
 
         if (parseResults.Errors.AsList().IsNotEmpty()) return;
 
-        var territoryOrder = new List<uint>();
-        var seenTerritories = new HashSet<uint>();
-        var marksByTerritory = new MultiDict<uint, SortData>();
+        var territoryInstanceOrder = new List<TerritoryInstance>();
+        var seenTerritoryInstances = new HashSet<TerritoryInstance>();
+        var marksByTerritoryInstance = new MultiDict<TerritoryInstance, SortData>();
         parseResults.Value.ForEach(mark =>
         {
             var territoryId = mark.MarkData.TerritoryId;
-            if (!seenTerritories.Contains(territoryId))
+            if (!seenTerritoryInstances.Contains(new TerritoryInstance(territoryId, mark.MarkData.Instance)))
             {
-                territoryOrder.Add(territoryId);
-                seenTerritories.Add(territoryId);
+                Logger.Info($"Adding {territoryId} tid and instanceid {mark.MarkData.Instance}");
+                territoryInstanceOrder.Add(new TerritoryInstance(territoryId, mark.MarkData.Instance));
+                seenTerritoryInstances.Add(new TerritoryInstance(territoryId, mark.MarkData.Instance));
             }
 
-            marksByTerritory.Add(territoryId, mark);
+            marksByTerritoryInstance.Add(new TerritoryInstance(territoryId, mark.MarkData.Instance), mark);
+            Logger.Info($"Added {mark} to dict");
         });
-
+        Logger.Info($"{territoryInstanceOrder.ToString()}");
         var newText = new StringBuilder();
-        var pathMessage = new StringBuilder("optimal hunt path:");
-        territoryOrder.ForEach(territoryId =>
+        var pathMessage = new TextPayload("optimal hunt path:\n");
+        var pathPayloads = new List<Payload>();
+        pathPayloads.Add(pathMessage);
+        territoryInstanceOrder.ForEach(territoryInstance =>
         {
+            Logger.Info($"honk {territoryInstance}");
+            var instancesForTerritory = seenTerritoryInstances.Where(ti =>
+                ti.TerritoryId == territoryInstance.TerritoryId).OrderBy(x => x.InstanceId);
             Vector3? previousPos = null;
-            var territoryPathSegments = marksByTerritory[territoryId]
-                .Sort((a, b) => Math.Sign(a.DistanceFromNearestAetheryte - b.DistanceFromNearestAetheryte))
-                .SelectMany(mark =>
-                {
-                    var pathSegments = new List<string>(3);
-                    var fromAetheryte = previousPos is null || (previousPos - mark.SpawnPoint).Value.Length() >
-                        mark.DistanceFromNearestAetheryte;
-                    if (fromAetheryte)
+                var territoryPathSegments = marksByTerritoryInstance[territoryInstance]
+                    .Sort((a, b) => Math.Sign(a.DistanceFromNearestAetheryte - b.DistanceFromNearestAetheryte))
+                    .Select(mark =>
                     {
-                        pathSegments.Add($"teleport ({mark.TravelNode.StartingAetheryte.Name})");
-                        if (!mark.TravelNode.IsAetheryte) pathSegments.Add($"{mark.TravelNode.Path}");
-                    }
+                        var payloadSegments = new List<List<Payload>>();
+                        var fromAetheryte = previousPos is null || (previousPos - mark.SpawnPoint).Value.Length() >
+                            mark.DistanceFromNearestAetheryte;
+                        List<Payload> travelPayloads = new List<Payload>();
+                        if (fromAetheryte)
+                        {
 
-                    var markPos = mark.MarkData.Position;
-                    pathSegments.Add($"{mark.MarkData.MarkName} ({markPos.X}, {markPos.Y})");
-                    previousPos = mark.SpawnPoint;
-                    
-                    newText.AppendLine(mark.MarkData.RawText);
+                            travelPayloads.Add(new TextPayload("teleport("));
+                            travelPayloads.AddRange(CreateAetheryteMapLinkPayload(mark.TravelNode.StartingAetheryte));
+                            travelPayloads.Add(new TextPayload(")\n"));
+                            if (!mark.TravelNode.IsAetheryte)
+                            {
+                                travelPayloads.Add(new TextPayload($"{mark.TravelNode.Path}"));
 
-                    return pathSegments;
-                })
-                .AsList();
-            
-            territoryPathSegments.ForEach((segment, i) =>
-            {
-                pathMessage.Append('\n');
-                if (i == territoryPathSegments.Count - 1)
+                            }
+                        }
+                        payloadSegments.Add(travelPayloads);
+
+                        var markPos = mark.MarkData.Position;
+
+                        payloadSegments.Add(CreateMapLink(mark.MarkData));
+                        previousPos = mark.SpawnPoint;
+
+                        newText.AppendLine(mark.MarkData.RawText);
+
+                        return payloadSegments;
+                    })
+                    .AsList();
+
+                territoryPathSegments.ForEach((markSegment, i) =>
                 {
-                    pathMessage.Append("┗ ");
-                }
-                else if (0 < i)
-                {
-                    pathMessage.Append("┣ ");
-                }
-                
-                pathMessage.Append(segment);
-            });
+                    pathPayloads.Add(new TextPayload("\n"));
+
+                    markSegment.ForEach((informationSegment, j) =>
+                    {
+                        if (j == markSegment.Count - 1)
+                        {
+                            pathPayloads.Add(new TextPayload("┗ "));
+                        }
+                        else if (0 < j)
+                        {
+                            pathPayloads.Add(new TextPayload("┣ "));
+                        }
+                        pathPayloads.AddRange(informationSegment);
+                    });
+                });
         });
 
-        Chat.Print(pathMessage.ToString());
-        
+        Chat.Print(new XivChatEntry
+        {
+            Type = XivChatType.Echo, Name = "", Message = new SeString(pathPayloads)
+        });
         textBuffer = newText.ToString();
     }
 
-    // This is a custom version of Dalamud's CreateMapLink method. It includes the mark name and the instance ID
-    private SeString CreateMapLink(MarkData markData)
+// This is a custom version of Dalamud's CreateMapLink method. It includes the mark name and the instance ID
+    private List<Payload> CreateMapLink(MarkData markData)
     {
         var mapLinkPayload =
             new MapLinkPayload(markData.TerritoryId, markData.MapId, markData.Position.X, markData.Position.Y);
         var text = mapLinkPayload.PlaceName + markData.Instance.AsInstanceIcon() + " " +
-            mapLinkPayload.CoordinateString;
+                   mapLinkPayload.CoordinateString;
 
         List<Payload> payloads = new List<Payload>()
         {
@@ -248,11 +276,37 @@ public sealed class MainWindow : Window, IDisposable
             RawPayload.LinkTerminator
         };
         payloads.InsertRange(1, SeString.TextArrowPayloads);
-        return new SeString(payloads);
+        return payloads;
     }
 
     private static float ComputeDistance(Vector3 spawnPoint, TravelNode travelNode) =>
         (spawnPoint - travelNode.Position).Length() + travelNode.DistanceModifier;
+
+    private List<Payload> CreateAetheryteMapLinkPayload(Aetheryte aetheryte)
+    {
+        var asdf = DataManagerManager.GetMapDataByName(aetheryte.Territory.Name()).Match(
+            Result.Success<MapData, TextPayload>,
+            () => new TextPayload("(unclickable)")).Map(map =>
+            new MapLinkPayload(aetheryte.Territory.Id(), map.RowId, aetheryte.Position.X, aetheryte.Position.Y));
+
+        List<Payload> bleh = new List<Payload>();
+        if (asdf.IsSuccess)
+        {
+            bleh.AddRange(SeString.TextArrowPayloads);
+            bleh.Add(asdf.Value);
+        }
+        else
+        {
+            bleh.Add(asdf.Error);
+        }
+
+        bleh.AddRange(new List<Payload>()
+        {
+            new TextPayload($"{aetheryte.Name}"),
+            RawPayload.LinkTerminator
+        });
+        return bleh;
+    }
 }
 
 internal record SortData(
@@ -260,4 +314,9 @@ internal record SortData(
     Vector3 SpawnPoint,
     TravelNode TravelNode,
     float DistanceFromNearestAetheryte
+);
+
+internal record TerritoryInstance(
+    uint TerritoryId,
+    uint? InstanceId
 );
