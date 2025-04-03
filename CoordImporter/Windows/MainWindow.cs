@@ -158,6 +158,7 @@ public sealed class MainWindow : Window, IDisposable
 
     private void SortByAetheryte(string payload)
     {
+        Logger.Info("Sorting marks by nearest aetheryte...");
         var parseResults = Importer
             .ParsePayload(payload)
             .SelectResults()
@@ -180,77 +181,74 @@ public sealed class MainWindow : Window, IDisposable
         parseResults.Value.ForEach(mark =>
         {
             var territoryId = mark.MarkData.TerritoryId;
-            if (!seenTerritoryInstances.Contains(new TerritoryInstance(territoryId, mark.MarkData.Instance)))
+            var markInstance = mark.MarkData.Instance;
+            var territoryInstance = new TerritoryInstance(territoryId, markInstance);
+            if (!seenTerritoryInstances.Contains(territoryInstance))
             {
-                Logger.Info($"Adding {territoryId} tid and instanceid {mark.MarkData.Instance}");
-                territoryInstanceOrder.Add(new TerritoryInstance(territoryId, mark.MarkData.Instance));
-                seenTerritoryInstances.Add(new TerritoryInstance(territoryId, mark.MarkData.Instance));
+                Logger.Info($"Adding territoryId [{territoryId}] instance [{markInstance}] to seen list");
+                territoryInstanceOrder.Add(territoryInstance);
+                seenTerritoryInstances.Add(territoryInstance);
             }
 
-            marksByTerritoryInstance.Add(new TerritoryInstance(territoryId, mark.MarkData.Instance), mark);
+            marksByTerritoryInstance.Add(territoryInstance, mark);
             Logger.Info($"Added {mark} to dict");
         });
-        Logger.Info($"{territoryInstanceOrder.ToString()}");
+        Logger.Info($"Territory/instance order: {territoryInstanceOrder}");
+        
         var newText = new StringBuilder();
-        var pathMessage = new TextPayload("optimal hunt path:\n");
-        var pathPayloads = new List<Payload>();
-        pathPayloads.Add(pathMessage);
+        var pathPayloads = new List<Payload> { new TextPayload("optimal hunt path:") };
         territoryInstanceOrder.ForEach(territoryInstance =>
         {
             Logger.Info($"honk {territoryInstance}");
-            var instancesForTerritory = seenTerritoryInstances.Where(ti =>
-                ti.TerritoryId == territoryInstance.TerritoryId).OrderBy(x => x.InstanceId);
             Vector3? previousPos = null;
-                var territoryPathSegments = marksByTerritoryInstance[territoryInstance]
-                    .Sort((a, b) => Math.Sign(a.DistanceFromNearestAetheryte - b.DistanceFromNearestAetheryte))
-                    .Select(mark =>
-                    {
-                        var payloadSegments = new List<List<Payload>>();
-                        var fromAetheryte = previousPos is null || (previousPos - mark.SpawnPoint).Value.Length() >
-                            mark.DistanceFromNearestAetheryte;
-                        List<Payload> travelPayloads = new List<Payload>();
-                        if (fromAetheryte)
-                        {
-
-                            travelPayloads.Add(new TextPayload("teleport("));
-                            travelPayloads.AddRange(CreateAetheryteMapLinkPayload(mark.TravelNode.StartingAetheryte));
-                            travelPayloads.Add(new TextPayload(")\n"));
-                            if (!mark.TravelNode.IsAetheryte)
-                            {
-                                travelPayloads.Add(new TextPayload($"{mark.TravelNode.Path}"));
-
-                            }
-                        }
-                        payloadSegments.Add(travelPayloads);
-
-                        var markPos = mark.MarkData.Position;
-
-                        payloadSegments.Add(CreateMapLink(mark.MarkData));
-                        previousPos = mark.SpawnPoint;
-
-                        newText.AppendLine(mark.MarkData.RawText);
-
-                        return payloadSegments;
-                    })
-                    .AsList();
-
-                territoryPathSegments.ForEach((markSegment, i) =>
+            var territoryPathSegments = marksByTerritoryInstance[territoryInstance]
+                .Sort((a, b) => Math.Sign(a.DistanceFromNearestAetheryte - b.DistanceFromNearestAetheryte))
+                .Select(mark =>
                 {
-                    pathPayloads.Add(new TextPayload("\n"));
-
-                    markSegment.ForEach((informationSegment, j) =>
+                    var payloadSegments = new List<List<Payload>>();
+                    var fromAetheryte = previousPos is null || (previousPos - mark.SpawnPoint).Value.Length() >
+                        mark.DistanceFromNearestAetheryte;
+                    var travelPayloads = new List<Payload>();
+                    if (fromAetheryte)
                     {
-                        if (j == markSegment.Count - 1)
+                        travelPayloads.Add(new TextPayload("teleport: "));
+                        travelPayloads.AddRange(CreateAetheryteMapLinkPayload(mark.TravelNode.StartingAetheryte));
+                        travelPayloads.Add(new TextPayload("\n"));
+                        if (!mark.TravelNode.IsAetheryte)
                         {
-                            pathPayloads.Add(new TextPayload("┗ "));
+                            travelPayloads.Add(new TextPayload($"{mark.TravelNode.Path}"));
                         }
-                        else if (0 < j)
-                        {
-                            pathPayloads.Add(new TextPayload("┣ "));
-                        }
-                        pathPayloads.AddRange(informationSegment);
-                    });
+                    }
+                    payloadSegments.Add(travelPayloads);
+
+                    var markPos = mark.MarkData.Position;
+
+                    payloadSegments.Add(CreateMapLink(mark.MarkData));
+                    previousPos = mark.SpawnPoint;
+
+                    newText.AppendLine(mark.MarkData.RawText);
+
+                    return payloadSegments;
+                })
+                .AsList();
+
+            territoryPathSegments.ForEach((markSegment, i) =>
+            {
+                pathPayloads.Add(new TextPayload("\n"));
+
+                markSegment.ForEach((informationSegment, j) =>
+                {
+                    if (j == markSegment.Count - 1)
+                    {
+                        pathPayloads.Add(new TextPayload("┗ "));
+                    }
+                    else if (0 < j)
+                    {
+                        pathPayloads.Add(new TextPayload("┣ "));
+                    }
+                    pathPayloads.AddRange(informationSegment);
                 });
+            });
         });
 
         Chat.Print(new XivChatEntry
