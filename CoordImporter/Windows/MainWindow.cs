@@ -24,10 +24,14 @@ using Serilog.Configuration;
 using XIVHuntUtils.Managers;
 using XIVHuntUtils.Models;
 
+using SeStringPayloads = System.Collections.Generic.List<Dalamud.Game.Text.SeStringHandling.Payload>;
+
 namespace CoordImporter.Windows;
 
 public sealed class MainWindow : Window, IDisposable
 {
+    private const char WideSpace = '\u3000';
+    
     private IPluginLog Logger;
     private IChatGui Chat;
     private Importer Importer;
@@ -196,60 +200,83 @@ public sealed class MainWindow : Window, IDisposable
         Logger.Info($"Territory/instance order: {territoryInstanceOrder}");
         
         var newText = new StringBuilder();
-        var pathPayloads = new List<Payload> { new TextPayload("optimal hunt path:") };
-        territoryInstanceOrder.ForEach(territoryInstance =>
-        {
-            Logger.Info($"honk {territoryInstance}");
-            Vector3? previousPos = null;
-            var territoryPathSegments = marksByTerritoryInstance[territoryInstance]
-                .Sort((a, b) => Math.Sign(a.DistanceFromNearestAetheryte - b.DistanceFromNearestAetheryte))
-                .Select(mark =>
-                {
-                    var payloadSegments = new List<List<Payload>>();
-                    var fromAetheryte = previousPos is null || (previousPos - mark.SpawnPoint).Value.Length() >
-                        mark.DistanceFromNearestAetheryte;
-                    var travelPayloads = new List<Payload>();
-                    if (fromAetheryte)
-                    {
-                        travelPayloads.Add(new TextPayload("teleport: "));
-                        travelPayloads.AddRange(CreateAetheryteMapLinkPayload(mark.TravelNode.StartingAetheryte));
-                        travelPayloads.Add(new TextPayload("\n"));
-                        if (!mark.TravelNode.IsAetheryte)
-                        {
-                            travelPayloads.Add(new TextPayload($"{mark.TravelNode.Path}"));
-                        }
-                    }
-                    payloadSegments.Add(travelPayloads);
-
-                    var markPos = mark.MarkData.Position;
-
-                    payloadSegments.Add(CreateMapLink(mark.MarkData));
-                    previousPos = mark.SpawnPoint;
-
-                    newText.AppendLine(mark.MarkData.RawText);
-
-                    return payloadSegments;
-                })
-                .AsList();
-
-            territoryPathSegments.ForEach((markSegment, i) =>
+        var territoryInstanceSegments = territoryInstanceOrder
+            .Select(territoryInstance => marksByTerritoryInstance[territoryInstance])
+            .Select(territoryInstanceMarks =>
             {
-                pathPayloads.Add(new TextPayload("\n"));
+                Vector3? previousPos = null;
+                return territoryInstanceMarks
+                    .Sort((a, b) => Math.Sign(a.DistanceFromNearestAetheryte - b.DistanceFromNearestAetheryte))
+                    .SelectMany((mark, i) =>
+                    {
+                        var markTravelSegments = new List<SeStringPayloads>();
+                        var travelSegment = new SeStringPayloads();
 
-                markSegment.ForEach((informationSegment, j) =>
+                        var fromAetheryte = previousPos is null || (previousPos - mark.SpawnPoint).Value.Length() >
+                            mark.DistanceFromNearestAetheryte;
+                        if (fromAetheryte)
+                        {
+                            travelSegment.Add(new TextPayload("teleport to "));
+                            travelSegment.AddRange(CreateAetheryteMapLinkPayload(mark.TravelNode.StartingAetheryte));
+                            markTravelSegments.Add(travelSegment);
+                            if (!mark.TravelNode.IsAetheryte)
+                            {
+                                markTravelSegments.Add([new TextPayload($"{mark.TravelNode.Path}")]);
+                            }
+                        }
+
+                        markTravelSegments.Add(CreateMapLink(mark.MarkData));
+                        previousPos = mark.SpawnPoint;
+
+                        newText.AppendLine(mark.MarkData.RawText);
+
+                        return markTravelSegments;
+                    })
+                    .AsList();
+            })
+            .AsList();
+
+        var pathPayloads = territoryInstanceSegments.SelectMany((territoryPathSegments, territoryIndex) =>
+                territoryPathSegments.Select((pathSegment, segmentIndex) =>
                 {
-                    if (j == markSegment.Count - 1)
-                    {
-                        pathPayloads.Add(new TextPayload("┗ "));
-                    }
-                    else if (0 < j)
-                    {
-                        pathPayloads.Add(new TextPayload("┣ "));
-                    }
-                    pathPayloads.AddRange(informationSegment);
-                });
+                    var treePrefix = new StringBuilder();
+
+                    var isLastTerritory = territoryIndex == territoryInstanceSegments.Count - 1;
+                    var isFirstTerritorySegment = segmentIndex == 0;
+                    var isLastTerritorySegment = segmentIndex == territoryPathSegments.Count - 1;
+
+                    if (isLastTerritory)
+                        treePrefix.Append(isFirstTerritorySegment ? '┗' : WideSpace);
+                    else
+                        treePrefix.Append(isFirstTerritorySegment ? '┣' : '┃');
+
+                    if (isFirstTerritorySegment)
+                        treePrefix.Append('┳');
+                    else if (isLastTerritorySegment)
+                        treePrefix.Append('┗');
+                    else
+                        treePrefix.Append('┣');
+                    treePrefix.Append(' ');
+                    // treePrefix.Append(" ");
+
+                    var newSegment = new SeStringPayloads();
+                    newSegment.Add(new TextPayload(treePrefix.ToString()));
+                    newSegment.AddRange(pathSegment);
+                    return newSegment;
+                })
+                .Concat(territoryIndex == territoryInstanceSegments.Count - 1 ? [] : [[new TextPayload("┃")]])
+            )
+            .Reduce((pathSegments, segment) =>
+            {
+                pathSegments.AddRange(segment);
+                pathSegments.Add(new NewLinePayload());
+                return pathSegments;
+            }, new SeStringPayloads
+            {
+                new NewLinePayload(),
+                new TextPayload("optimal hunt path:"),
+                new NewLinePayload()
             });
-        });
 
         Chat.Print(new XivChatEntry
         {
