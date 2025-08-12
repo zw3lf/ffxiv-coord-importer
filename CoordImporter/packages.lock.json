@@ -4,15 +4,25 @@
     "net9.0-windows7.0": {
       "CSharpFunctionalExtensions": {
         "type": "Direct",
-        "requested": "[2.40.3, )",
-        "resolved": "2.40.3",
-        "contentHash": "G+t+bf39aixVFN3O3Q5LoE0zy3o8QlV3mv3ATw76XwDRWkE9eFRLzZdx9HH9fgbPpasfP4kr8cnnXIP+Z7GcrQ=="
+        "requested": "[3.6.0, )",
+        "resolved": "3.6.0",
+        "contentHash": "c+oWbfDKKjpOLPMxn/iPn1GL24YTJMtOiGfj0AsDKZ2v6/Mr6V7BfzfWLg6KqNRx3KRy3KcQE680SwvDTI/jcg=="
       },
       "DalamudPackager": {
         "type": "Direct",
         "requested": "[13.0.0, )",
         "resolved": "13.0.0",
         "contentHash": "Mb3cUDSK/vDPQ8gQIeuCw03EMYrej1B4J44a1AvIJ9C759p9XeqdU9Hg4WgOmlnlPe0G7ILTD32PKSUpkQNa8w=="
+      },
+      "DitzyExtensions": {
+        "type": "Direct",
+        "requested": "[2.0.0, )",
+        "resolved": "2.0.0",
+        "contentHash": "8U9kB8+4bBkNcBqfnG200BwysCBhokgPKpuj7NgtzQXy/JPGol6SSxFuq/xCAy/zSYsZUHp1rzf/OC2LrgmzNQ==",
+        "dependencies": {
+          "CSharpFunctionalExtensions": "3.5.1",
+          "System.Numerics.Vectors": "4.6.1"
+        }
       },
       "DotNet.ReproducibleBuilds": {
         "type": "Direct",
@@ -48,6 +58,17 @@
           "Microsoft.Extensions.Logging.EventSource": "7.0.0",
           "Microsoft.Extensions.Options": "7.0.1",
           "System.Diagnostics.DiagnosticSource": "7.0.1"
+        }
+      },
+      "XIVHuntUtils": {
+        "type": "Direct",
+        "requested": "[1.5.1, )",
+        "resolved": "1.5.1",
+        "contentHash": "/7Lvz3ujSuNWPBGYvBQfu/DEyZlvjLnmCHKrejkNRipUdKwMaCMGYjvRMRIN2dcc2SqyUF69wgbs4tUPuLhizw==",
+        "dependencies": {
+          "CSharpFunctionalExtensions": "3.5.1",
+          "DitzyExtensions": "2.0.0",
+          "System.Numerics.Vectors": "4.6.1"
         }
       },
       "Microsoft.Extensions.Configuration": {
@@ -288,6 +309,11 @@
         "type": "Transitive",
         "resolved": "7.0.0",
         "contentHash": "eUDP47obqQm3SFJfP6z+Fx2nJ4KKTQbXB4Q9Uesnzw9SbYdhjyoGXuvDn/gEmFY6N5Z3bFFbpAQGA7m6hrYJCw=="
+      },
+      "System.Numerics.Vectors": {
+        "type": "Transitive",
+        "resolved": "4.6.1",
+        "contentHash": "sQxefTnhagrhoq2ReR0D/6K0zJcr9Hrd6kikeXsA1I8kOCboTavcUC4r7TSfpKFeE163uMuxZcyfO1mGO3EN8Q=="
       },
       "System.Text.Encodings.Web": {
         "type": "Transitive",

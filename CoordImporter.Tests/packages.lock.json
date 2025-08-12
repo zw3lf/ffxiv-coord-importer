@@ -10,11 +10,12 @@
       },
       "DitzyExtensions": {
         "type": "Direct",
-        "requested": "[1.0.1, )",
-        "resolved": "1.0.1",
-        "contentHash": "WBuAIf9yDViR8MNWP3iKSHsScVCbmv3jqPSoko+7MND/fS1X6Iu2uEjw9oedA0x1akLOrL+j328spKHg/A4npw==",
+        "requested": "[2.0.0, )",
+        "resolved": "2.0.0",
+        "contentHash": "8U9kB8+4bBkNcBqfnG200BwysCBhokgPKpuj7NgtzQXy/JPGol6SSxFuq/xCAy/zSYsZUHp1rzf/OC2LrgmzNQ==",
         "dependencies": {
-          "CSharpFunctionalExtensions": "2.42.5"
+          "CSharpFunctionalExtensions": "3.5.1",
+          "System.Numerics.Vectors": "4.6.1"
         }
       },
       "DotNet.ReproducibleBuilds": {
@@ -89,8 +90,8 @@
       },
       "CSharpFunctionalExtensions": {
         "type": "Transitive",
-        "resolved": "2.42.5",
-        "contentHash": "Do9Q7Nyfx2G4HRt96aB6yoP5Z9ic3jqBHLrf35tULzsWlFoBlkQZT62aXCiv7UmVmF56OUR+a3JoSSs140hfHQ=="
+        "resolved": "3.6.0",
+        "contentHash": "c+oWbfDKKjpOLPMxn/iPn1GL24YTJMtOiGfj0AsDKZ2v6/Mr6V7BfzfWLg6KqNRx3KRy3KcQE680SwvDTI/jcg=="
       },
       "DalamudPackager": {
         "type": "Transitive",
@@ -450,6 +451,11 @@
         "resolved": "7.0.0",
         "contentHash": "eUDP47obqQm3SFJfP6z+Fx2nJ4KKTQbXB4Q9Uesnzw9SbYdhjyoGXuvDn/gEmFY6N5Z3bFFbpAQGA7m6hrYJCw=="
       },
+      "System.Numerics.Vectors": {
+        "type": "Transitive",
+        "resolved": "4.6.1",
+        "contentHash": "sQxefTnhagrhoq2ReR0D/6K0zJcr9Hrd6kikeXsA1I8kOCboTavcUC4r7TSfpKFeE163uMuxZcyfO1mGO3EN8Q=="
+      },
       "System.Reflection.Metadata": {
         "type": "Transitive",
         "resolved": "1.6.0",
@@ -468,12 +474,24 @@
           "System.Text.Encodings.Web": "7.0.0"
         }
       },
+      "XIVHuntUtils": {
+        "type": "Transitive",
+        "resolved": "1.5.1",
+        "contentHash": "/7Lvz3ujSuNWPBGYvBQfu/DEyZlvjLnmCHKrejkNRipUdKwMaCMGYjvRMRIN2dcc2SqyUF69wgbs4tUPuLhizw==",
+        "dependencies": {
+          "CSharpFunctionalExtensions": "3.5.1",
+          "DitzyExtensions": "2.0.0",
+          "System.Numerics.Vectors": "4.6.1"
+        }
+      },
       "coordimporter": {
         "type": "Project",
         "dependencies": {
-          "CSharpFunctionalExtensions": "[2.40.3, )",
+          "CSharpFunctionalExtensions": "[3.6.0, )",
           "DalamudPackager": "[13.0.0, )",
-          "Microsoft.Extensions.Hosting": "[7.0.1, )"
+          "DitzyExtensions": "[2.0.0, )",
+          "Microsoft.Extensions.Hosting": "[7.0.1, )",
+          "XIVHuntUtils": "[1.5.1, )"
         }
       }
     }
