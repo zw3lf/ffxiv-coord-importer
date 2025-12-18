@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Dalamud.NET.Sdk/13.0.0">
+<Project Sdk="Dalamud.NET.Sdk/14.0.1">
     <PropertyGroup>
         <Authors>zw3lf;dit-zy</Authors>
         <Company></Company>
-        <Version>1.2.0.4</Version>
+        <Version>1.2.0.5</Version>
         <Description>Import map coordinates to echo chat.</Description>
         <Copyright>MIT</Copyright>
         <PackageProjectUrl>https://github.com/zw3lf/ffxiv-coord-importer</PackageProjectUrl>
