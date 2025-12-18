@@ -4,9 +4,9 @@
     "net10.0-windows7.0": {
       "CSharpFunctionalExtensions": {
         "type": "Direct",
-        "requested": "[2.40.3, )",
-        "resolved": "2.40.3",
-        "contentHash": "G+t+bf39aixVFN3O3Q5LoE0zy3o8QlV3mv3ATw76XwDRWkE9eFRLzZdx9HH9fgbPpasfP4kr8cnnXIP+Z7GcrQ=="
+        "requested": "[3.6.0, )",
+        "resolved": "3.6.0",
+        "contentHash": "c+oWbfDKKjpOLPMxn/iPn1GL24YTJMtOiGfj0AsDKZ2v6/Mr6V7BfzfWLg6KqNRx3KRy3KcQE680SwvDTI/jcg=="
       },
       "DalamudPackager": {
         "type": "Direct",
