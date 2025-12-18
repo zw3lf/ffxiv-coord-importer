@@ -1,10 +1,12 @@
-﻿using CoordImporter.Managers;
+﻿using System.Linq;
+using CoordImporter.Managers;
 using CoordImporter.Parsers;
 using CoordImporter.Windows;
 using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using DitzyExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using XIVHuntUtils.Managers;
@@ -21,6 +23,8 @@ namespace CoordImporter
         private WindowSystem WindowSystem { get; } = new WindowSystem("CoordinateImporter");
 
         private MainWindow MainWindow { get; init; }
+        
+        private ConfigWindow ConfigWindow { get; init; }
 
         private ServiceProvider ServiceProvider { get; init; }
 
@@ -31,11 +35,15 @@ namespace CoordImporter
             IDataManager dataManager,
             IPluginLog logger)
         {
+            var config = (pluginInterface.GetPluginConfig() as CiConfiguration) ?? new CiConfiguration();
+            config.Initialize(pluginInterface);
+            
             ServiceProvider = new ServiceCollection()
                 .AddSingleton(logger)
                 .AddSingleton(chat)
                 .AddSingleton(dataManager)
                 .AddSingleton(pluginInterface)
+                .AddSingleton(config)
                 .AddSingleton<IDataManagerManager, DataManagerManager>()
                 .AddSingleton<IMobManager, MobManager>()
                 .AddSingleton<ITerritoryManager, TerritoryManager>()
@@ -50,7 +58,9 @@ namespace CoordImporter
                 .AddSingleton<SirenParser>()
                 .AddSingleton<TurtleParser>()
                 .AddSingleton<Importer>()
+                .AddSingleton<SortManager>()
                 .AddSingleton<MainWindow>()
+                .AddSingleton<ConfigWindow>()
                 .AddSingleton<HuntHelperManager>()
                 .AddSingleton<InitializationManager>()
                 .BuildServiceProvider();
@@ -61,8 +71,10 @@ namespace CoordImporter
             ServiceProvider.GetService<InitializationManager>()!.InitializeNecessaryComponents();
 
             MainWindow = ServiceProvider.GetService<MainWindow>()!;
+            ConfigWindow = ServiceProvider.GetService<ConfigWindow>()!;
 
             WindowSystem.AddWindow(MainWindow);
+            WindowSystem.AddWindow(ConfigWindow);
 
             CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
             {
@@ -70,12 +82,15 @@ namespace CoordImporter
             });
 
             PluginInterface.UiBuilder.Draw += DrawUI;
+            PluginInterface.UiBuilder.OpenMainUi += OpenMainUi;
+            PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
         }
 
         public void Dispose()
         {
             this.WindowSystem.RemoveAllWindows();
             MainWindow.Dispose();
+            ConfigWindow.Dispose();
             this.CommandManager.RemoveHandler(CommandName);
             ServiceProvider.Dispose();
         }
@@ -89,6 +104,16 @@ namespace CoordImporter
         private void DrawUI()
         {
             this.WindowSystem.Draw();
+        }
+
+        private void OpenMainUi()
+        {
+            MainWindow.IsOpen = true;
+        }
+
+        private void OpenConfigUi()
+        {
+            ConfigWindow.IsOpen = true;
         }
     }
 }

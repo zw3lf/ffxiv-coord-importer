@@ -10,12 +10,11 @@
       },
       "DitzyExtensions": {
         "type": "Direct",
-        "requested": "[2.0.0, )",
-        "resolved": "2.0.0",
-        "contentHash": "8U9kB8+4bBkNcBqfnG200BwysCBhokgPKpuj7NgtzQXy/JPGol6SSxFuq/xCAy/zSYsZUHp1rzf/OC2LrgmzNQ==",
+        "requested": "[3.2.0, )",
+        "resolved": "3.2.0",
+        "contentHash": "cfuXYy9wah4cdzMqQF8Y0ftHgNdMWh37b28owUPjpSOwP71m8JsDbw9QM3j1/byjdrfB5EEQNWe7Yag+Y6FjDg==",
         "dependencies": {
-          "CSharpFunctionalExtensions": "3.5.1",
-          "System.Numerics.Vectors": "4.6.1"
+          "CSharpFunctionalExtensions": "3.6.0"
         }
       },
       "DotNet.ReproducibleBuilds": {
@@ -92,6 +91,11 @@
         "type": "Transitive",
         "resolved": "3.6.0",
         "contentHash": "c+oWbfDKKjpOLPMxn/iPn1GL24YTJMtOiGfj0AsDKZ2v6/Mr6V7BfzfWLg6KqNRx3KRy3KcQE680SwvDTI/jcg=="
+      },
+      "DalamudPackager": {
+        "type": "Transitive",
+        "resolved": "14.0.1",
+        "contentHash": "y0WWyUE6dhpGdolK3iKgwys05/nZaVf4ZPtIjpLhJBZvHxkkiE23zYRo7K7uqAgoK/QvK5cqF6l3VG5AbgC6KA=="
       },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
@@ -183,39 +187,23 @@
         "resolved": "6.0.0",
         "contentHash": "lcyUiXTsETK2ALsZrX+nWuHSIQeazhqPphLfaRxzdGaG93+0kELqpgEHtwWOlQe7+jSFnKwaCAgL4kjeZCQJnw=="
       },
-      "System.Numerics.Vectors": {
-        "type": "Transitive",
-        "resolved": "4.6.1",
-        "contentHash": "sQxefTnhagrhoq2ReR0D/6K0zJcr9Hrd6kikeXsA1I8kOCboTavcUC4r7TSfpKFeE163uMuxZcyfO1mGO3EN8Q=="
-      },
-      "System.Reflection.Metadata": {
-        "type": "Transitive",
-        "resolved": "1.6.0",
-        "contentHash": "COC1aiAJjCoA5GBF+QKL2uLqEBew4JsCkQmoHKbN3TlOZKa2fKLz5CpiRQKDz0RsAOEGsVKqOD5bomsXq/4STQ=="
-      },
-      "System.Text.Json": {
-        "type": "Transitive",
-        "resolved": "5.0.2",
-        "contentHash": "I47dVIGiV6SfAyppphxqupertT/5oZkYLDCX6vC3HpOI4ZLjyoKAreUoem2ie6G0RbRuFrlqz/PcTQjfb2DOfQ=="
-      },
       "XIVHuntUtils": {
         "type": "Transitive",
-        "resolved": "1.5.1",
-        "contentHash": "/7Lvz3ujSuNWPBGYvBQfu/DEyZlvjLnmCHKrejkNRipUdKwMaCMGYjvRMRIN2dcc2SqyUF69wgbs4tUPuLhizw==",
+        "resolved": "1.6.2",
+        "contentHash": "OrKTlCD6rV6EKSoeQrTFlvCL8m4gasSGjBJTWIVysICnh/9RQ+LRHl2pUndD9GfjCV0FULR+SPSiqvI0j5gT8g==",
         "dependencies": {
-          "CSharpFunctionalExtensions": "3.5.1",
-          "DitzyExtensions": "2.0.0",
-          "System.Numerics.Vectors": "4.6.1"
+          "CSharpFunctionalExtensions": "3.6.0",
+          "DitzyExtensions": "3.2.0"
         }
       },
       "coordimporter": {
         "type": "Project",
         "dependencies": {
           "CSharpFunctionalExtensions": "[3.6.0, )",
-          "DalamudPackager": "[13.0.0, )",
-          "DitzyExtensions": "[2.0.0, )",
+          "DalamudPackager": "[14.0.1, )",
+          "DitzyExtensions": "[3.2.0, )",
           "Microsoft.Extensions.Hosting": "[7.0.1, )",
-          "XIVHuntUtils": "[1.5.1, )"
+          "XIVHuntUtils": "[1.6.2, )"
         }
       }
     }

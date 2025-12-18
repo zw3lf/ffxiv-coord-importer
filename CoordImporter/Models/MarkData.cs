@@ -10,4 +10,7 @@ public record struct MarkData(
     uint MapId,
     uint? Instance,
     Vector2 Position
-);
+)
+{
+    public (uint territoryId, uint? instance) TerritoryInstance() => (TerritoryId, Instance);
+};
