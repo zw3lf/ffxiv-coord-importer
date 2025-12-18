@@ -88,13 +88,13 @@
       },
       "CSharpFunctionalExtensions": {
         "type": "Transitive",
-        "resolved": "3.6.0",
-        "contentHash": "c+oWbfDKKjpOLPMxn/iPn1GL24YTJMtOiGfj0AsDKZ2v6/Mr6V7BfzfWLg6KqNRx3KRy3KcQE680SwvDTI/jcg=="
+        "resolved": "2.42.5",
+        "contentHash": "Do9Q7Nyfx2G4HRt96aB6yoP5Z9ic3jqBHLrf35tULzsWlFoBlkQZT62aXCiv7UmVmF56OUR+a3JoSSs140hfHQ=="
       },
       "DalamudPackager": {
         "type": "Transitive",
-        "resolved": "14.0.0",
-        "contentHash": "9c1q/eAeAs82mkQWBOaCvbt3GIQxAIadz5b/7pCXDIy9nHPtnRc+tDXEvKR+M36Wvi7n+qBTevRupkLUQp6DFA=="
+        "resolved": "14.0.1",
+        "contentHash": "y0WWyUE6dhpGdolK3iKgwys05/nZaVf4ZPtIjpLhJBZvHxkkiE23zYRo7K7uqAgoK/QvK5cqF6l3VG5AbgC6KA=="
       },
       "Microsoft.CodeCoverage": {
         "type": "Transitive",
@@ -442,8 +442,8 @@
       "coordimporter": {
         "type": "Project",
         "dependencies": {
-          "CSharpFunctionalExtensions": "[3.6.0, )",
-          "DalamudPackager": "[14.0.0, )",
+          "CSharpFunctionalExtensions": "[2.40.3, )",
+          "DalamudPackager": "[14.0.1, )",
           "Microsoft.Extensions.Hosting": "[7.0.1, )"
         }
       }
