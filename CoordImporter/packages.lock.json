@@ -16,11 +16,11 @@
       },
       "DitzyExtensions": {
         "type": "Direct",
-        "requested": "[2.0.0, )",
-        "resolved": "2.0.0",
-        "contentHash": "8U9kB8+4bBkNcBqfnG200BwysCBhokgPKpuj7NgtzQXy/JPGol6SSxFuq/xCAy/zSYsZUHp1rzf/OC2LrgmzNQ==",
+        "requested": "[3.2.0, )",
+        "resolved": "3.2.0",
+        "contentHash": "cfuXYy9wah4cdzMqQF8Y0ftHgNdMWh37b28owUPjpSOwP71m8JsDbw9QM3j1/byjdrfB5EEQNWe7Yag+Y6FjDg==",
         "dependencies": {
-          "CSharpFunctionalExtensions": "3.5.1"
+          "CSharpFunctionalExtensions": "3.6.0"
         }
       },
       "DotNet.ReproducibleBuilds": {
@@ -60,12 +60,12 @@
       },
       "XIVHuntUtils": {
         "type": "Direct",
-        "requested": "[1.5.1, )",
-        "resolved": "1.5.1",
-        "contentHash": "/7Lvz3ujSuNWPBGYvBQfu/DEyZlvjLnmCHKrejkNRipUdKwMaCMGYjvRMRIN2dcc2SqyUF69wgbs4tUPuLhizw==",
+        "requested": "[1.6.2, )",
+        "resolved": "1.6.2",
+        "contentHash": "OrKTlCD6rV6EKSoeQrTFlvCL8m4gasSGjBJTWIVysICnh/9RQ+LRHl2pUndD9GfjCV0FULR+SPSiqvI0j5gT8g==",
         "dependencies": {
-          "CSharpFunctionalExtensions": "3.5.1",
-          "DitzyExtensions": "2.0.0"
+          "CSharpFunctionalExtensions": "3.6.0",
+          "DitzyExtensions": "3.2.0"
         }
       },
       "Microsoft.Extensions.Configuration": {
