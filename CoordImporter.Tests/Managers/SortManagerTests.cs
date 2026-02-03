@@ -39,7 +39,7 @@ public class SortManagerTests
             9  Rrax yity'a @ Yak T'el ( 24.8 , 33.0 )
             10 Cat's eye @ Living Memory ( 26.8 , 31.0 ) Instance ONE
             11 O poorest pauldia @ Il Mheg ( 10.8 , 20.4 )
-            """.Split("\n").Select(line => line[3..]).AsList();
+            """.Replace("\r", "").Split("\n").Select(line => line[3..]).AsList();
 
     private static readonly IList<Patch> PatchOrder =
     [
