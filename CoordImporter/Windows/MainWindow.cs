@@ -9,24 +9,54 @@ using Dalamud.Bindings.ImGui;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
+using System.Reflection.Metadata;
+using System.Text;
 using CoordImporter.Models;
 using Dalamud.Game.Text;
+using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
+using DitzyExtensions.Collection;
+using DitzyExtensions.Functional;
+using Serilog.Configuration;
+using XIVHuntUtils.Managers;
+using XIVHuntUtils.Models;
+using static CoordImporter.Utils;
+using SeStringPayloads = System.Collections.Generic.List<Dalamud.Game.Text.SeStringHandling.Payload>;
 
 namespace CoordImporter.Windows;
 
 public sealed class MainWindow : Window, IDisposable
 {
+    private const char WideSpace = '\u3000';
+
     private IPluginLog Logger;
     private IChatGui Chat;
     private Importer Importer;
     private HuntHelperManager HuntHelperManager;
+    private IHuntManager HuntManager;
+    private ITravelManager TravelManager;
+    private IDataManagerManager DataManagerManager;
+    private ConfigWindow ConfigWindow;
+    private SortManager SortManager;
+    private CiConfiguration Config;
 
     private string textBuffer = string.Empty;
 
-    public MainWindow(IPluginLog logger, IChatGui chat, Importer importer, HuntHelperManager huntHelperManager) : base("Coordinate Importer")
+    public MainWindow(
+        IPluginLog logger,
+        IChatGui chat,
+        Importer importer,
+        HuntHelperManager huntHelperManager,
+        IHuntManager huntManager,
+        ITravelManager travelManager,
+        IDataManagerManager dataManagerManager,
+        ConfigWindow configWindow,
+        SortManager sortManager,
+        CiConfiguration config
+    ) : base("Coordinate Importer")
     {
         this.SizeConstraints = new WindowSizeConstraints
         {
@@ -37,6 +67,12 @@ public sealed class MainWindow : Window, IDisposable
         Chat = chat;
         Importer = importer;
         HuntHelperManager = huntHelperManager;
+        HuntManager = huntManager;
+        TravelManager = travelManager;
+        DataManagerManager = dataManagerManager;
+        ConfigWindow = configWindow;
+        SortManager = sortManager;
+        this.Config = config;
     }
 
     public void Dispose() { }
@@ -44,27 +80,55 @@ public sealed class MainWindow : Window, IDisposable
     public override void Draw()
     {
         ImGui.Spacing();
-        if (ImGui.Button("Import", new Vector2(80, 24)))
+        if (ImGui.Button("Import"))
         {
-            PerformImport(textBuffer);
+            if (Config.PrintOptimalPath)
+            {
+                SortManager.PrintOptimalPath(textBuffer);
+            }
+            else
+            {
+                PerformImport(textBuffer);
+            }
         }
+
         ImGui.SameLine();
         if (ImGuiComponents.IconButton(FontAwesomeIcon.ArrowUpFromBracket))
         {
             ImportToHuntHelper(textBuffer);
         }
+
         if (ImGui.IsItemHovered())
         {
             ImGui.SetTooltip("Import to Hunt Helper");
         }
 
         ImGui.SameLine();
-        ImGui.Dummy(new Vector2(24.0f, 0.0f));
+        if (ImGuiComponents.IconButton(FontAwesomeIcon.ArrowsUpDown))
+        {
+            textBuffer = SortManager.SortEntries(textBuffer);
+        }
+
+        if (ImGui.IsItemHovered())
+            ImGuiPlus.CreateTooltip(
+                "Sort the list of marks. Sorting can be configured in the Coord Importer settings."
+            );
+
         ImGui.SameLine();
-        if (ImGui.Button("Clean", new Vector2(80, 24)))
+        if (ImGuiComponents.IconButton(FontAwesomeIcon.Cog))
+        {
+            ConfigWindow.OpenConfigWindow();
+        }
+
+        ImGui.SameLine();
+        ImGui.SetCursorPosX(ImGui.GetWindowContentRegionMax().X - ImGuiHelpers.GetButtonSize("Clean").X);
+        if (ImGui.Button("Clean"))
         {
             textBuffer = "";
         }
+
+        if (ImGui.IsItemHovered()) ImGui.SetTooltip("Clear the paste window of text");
+
         ImGui.Text("Paste Coordinates:");
         ImGui.Indent(10);
 
@@ -76,7 +140,7 @@ public sealed class MainWindow : Window, IDisposable
             availableSpace.Y - padding.Y
         );
 
-        ImGui.InputTextMultiline("", ref textBuffer, 16384, dynamicSize, ImGuiInputTextFlags.None);
+        ImGui.InputTextMultiline("##", ref textBuffer, 16384, dynamicSize, ImGuiInputTextFlags.None);
     }
 
     private void PerformImport(string payload)
@@ -86,7 +150,8 @@ public sealed class MainWindow : Window, IDisposable
             .ForEach(markDataResult =>
             {
                 markDataResult.Match(
-                    markData => Chat.Print(new XivChatEntry { Type = XivChatType.Echo, Name = "", Message = CreateMapLink(markData) }),
+                    markData => Chat.Print(new XivChatEntry
+                        { Type = XivChatType.Echo, Name = "", Message = new SeString(CreateMapLink(markData)) }),
                     error => Chat.PrintError(error)
                 );
             });
@@ -95,17 +160,17 @@ public sealed class MainWindow : Window, IDisposable
     private void ImportToHuntHelper(string payload)
     {
         var marks = Importer
-                    .ParsePayload(payload)
-                    .Select(result => result.Match(
-                                markData => Maybe.From(markData),
-                                error =>
-                                {
-                                    Chat.PrintError(error);
-                                    return Maybe.None;
-                                }
-                            ))
-                    .Choose()
-                    .ToImmutableList();
+            .ParsePayload(payload)
+            .Select(result => result.Match(
+                markData => Maybe.From(markData),
+                error =>
+                {
+                    Chat.PrintError(error);
+                    return Maybe.None;
+                }
+            ))
+            .Choose()
+            .ToImmutableList();
 
         Logger.Debug(string.Join(", ", marks));
 
@@ -113,21 +178,9 @@ public sealed class MainWindow : Window, IDisposable
             .ImportTrainList(marks)
             .Execute(error => Chat.PrintError(error));
     }
-
-    // This is a custom version of Dalamud's CreateMapLink method. It includes the mark name and the instance ID
-    private SeString CreateMapLink(MarkData markData)
-    {
-        var mapLinkPayload = new MapLinkPayload(markData.TerritoryId, markData.MapId, markData.Position.X, markData.Position.Y);
-        var text = mapLinkPayload.PlaceName + markData.Instance.AsInstanceIcon() + " " + mapLinkPayload.CoordinateString;
-
-        List<Payload> payloads = new List<Payload>()
-        {
-            mapLinkPayload,
-            new TextPayload(text),
-            new TextPayload($" ({markData.MarkName})"),
-            RawPayload.LinkTerminator
-        };
-        payloads.InsertRange(1, SeString.TextArrowPayloads);
-        return new SeString(payloads);
-    }
 }
+
+internal record TerritoryInstance(
+    uint TerritoryId,
+    uint? InstanceId
+);
