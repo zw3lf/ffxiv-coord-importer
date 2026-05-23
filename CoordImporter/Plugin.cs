@@ -36,11 +36,11 @@ namespace CoordImporter
             builder.Services.AddSingleton(dataManager);
             builder.Services.AddSingleton(pluginInterface);
             builder.Services.AddSingleton<IDataManagerManager, DataManagerManager>();
-            builder.Services.AddSingleton<ITrackerParser, BearParser>();
+            builder.Services.AddSingleton<ITrackerParser, BearOrUltimaParser>();
             builder.Services.AddSingleton<ITrackerParser, FaloopParser>();
             builder.Services.AddSingleton<ITrackerParser, SirenParser>();
             builder.Services.AddSingleton<ITrackerParser, TurtleParser>();
-            builder.Services.AddSingleton<BearParser>();
+            builder.Services.AddSingleton<BearOrUltimaParser>();
             builder.Services.AddSingleton<FaloopParser>();
             builder.Services.AddSingleton<SirenParser>();
             builder.Services.AddSingleton<TurtleParser>();

@@ -34,7 +34,7 @@ namespace CoordImporter.Tests
                            @"Raiden [S]: Gamma - Yanxia ( 23.6, 11.4 )",
                            "Gamma", "Yanxia", new Vector2(23.6f, 11.4f)
             ),
-            CreateTestCase(ParserType.Bear,
+            CreateTestCase(ParserType.BearOrUltima,
                            @"The Rak'tika Greatwood ( 14.6 , 22.3 ) Supay",
                            "Supay", "The Rak'tika Greatwood", new Vector2(14.6f, 22.3f)
             ),
@@ -54,13 +54,17 @@ namespace CoordImporter.Tests
                            @"Odin [S]: Vogaal Ja - Middle La Noscea (1) ( 8.2, 32.65 )",
                            "Vogaal Ja", "Middle La Noscea", new Vector2(8.2f, 32.65f), 1
             ),
-            CreateTestCase(ParserType.Bear,
+            CreateTestCase(ParserType.BearOrUltima,
                            @"Thavnair 3 ( 27.6 , 25.6 ) Sugriva",
                            "Sugriva", "Thavnair", new Vector2(27.6f, 25.6f), 3
             ),
             CreateTestCase(ParserType.Turtle,
                            $@"The raintriller @ {LinkChar}Kozama'uka{I2Char} ( 20.30 , 28.40 ) Instance TWO",
                            "The raintriller", "Kozama'uka", new Vector2(20.30f, 28.40f), 2
+            ),
+            CreateTestCase(ParserType.BearOrUltima,
+                       @"Thavnair (27.6, 25.6) 2 Yilan",
+                       "Yilan", "Thavnair", new Vector2(27.6f, 25.6f), 2
             )
         );
 
@@ -82,11 +86,11 @@ namespace CoordImporter.Tests
             builder.Services.AddSingleton(_Chat);
             builder.Services.AddSingleton(_DataManager);
             builder.Services.AddSingleton(_DataManagerManager);
-            builder.Services.AddSingleton<ITrackerParser, BearParser>();
+            builder.Services.AddSingleton<ITrackerParser, BearOrUltimaParser>();
             builder.Services.AddSingleton<ITrackerParser, FaloopParser>();
             builder.Services.AddSingleton<ITrackerParser, SirenParser>();
             builder.Services.AddSingleton<ITrackerParser, TurtleParser>();
-            builder.Services.AddSingleton<BearParser>();
+            builder.Services.AddSingleton<BearOrUltimaParser>();
             builder.Services.AddSingleton<FaloopParser>();
             builder.Services.AddSingleton<SirenParser>();
             builder.Services.AddSingleton<TurtleParser>();
@@ -95,7 +99,7 @@ namespace CoordImporter.Tests
 
             Parsers = new Dictionary<ParserType, ITrackerParser>()
             {
-                { ParserType.Bear, host.Services.GetService<BearParser>()! },
+                { ParserType.BearOrUltima, host.Services.GetService<BearOrUltimaParser>()! },
                 { ParserType.Faloop, host.Services.GetService<FaloopParser>()! },
                 { ParserType.Siren, host.Services.GetService<SirenParser>()! },
                 { ParserType.Turtle, host.Services.GetService<TurtleParser>()! },
@@ -171,7 +175,7 @@ namespace CoordImporter.Tests
         {
             Siren,
             Faloop,
-            Bear,
+            BearOrUltima,
             Turtle,
         }
     }
