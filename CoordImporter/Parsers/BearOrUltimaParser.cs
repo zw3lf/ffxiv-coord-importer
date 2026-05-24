@@ -24,7 +24,7 @@ public class BearOrUltimaParser : Parser
         var groups = Regex.Matches(inputLine).First().Groups;
         LogParse("BearOrUltima", inputLine, groups);
         if (groups["x_coord"].Value.Length == 0) return ITrackerParser.ParseErrorIgnoreMark;
-        return CreateMark(groups, instance => (uint)(instance.First() - '0'));
+        return CreateMark(inputLine, groups, instance => (uint)(instance.First() - '0'));
     }
 
     public override bool CanParseLine(string inputLine) => !inputLine.Contains(LinkChar) && Regex.IsMatch(inputLine);
