@@ -45,21 +45,34 @@ public abstract class Parser : ITrackerParser
                    var markName = groups["mark_name"].Value;
                    var x = float.Parse(groups["x_coord"].Value, CultureInfo.InvariantCulture);
                    var y = float.Parse(groups["y_coord"].Value, CultureInfo.InvariantCulture);
-                   var instance = groups["instance"]
-                                  .Value.AsMaybe()
-                                  .Select(instance => instance.Length == 0
-                                                          ? null
-                                                          : instance)
-                                  .Select(instance => (uint?)instanceParser.Invoke(instance!))
-                                  .GetValueOrDefault();
+                   uint? instanceOut;
+                   if (groups["instance"].Captures.Count > 1)
+                   {
+                       // Pick whichever is "first" after filtering out nulls
+                       instanceOut = groups["instance"].Captures.SkipWhile(e => e.Length == 0)
+                                                       .FirstOrDefault()
+                                                       .AsMaybe()
+                                                       .Select(instance => (uint?)instanceParser.Invoke(instance.Value!))
+                                                       .GetValueOrDefault();
+                   }
+                   else
+                   {
+                       instanceOut = groups["instance"].Value
+                                                       .AsMaybe()
+                                                       .Select(instance => instance.Length == 0
+                                                                               ? null
+                                                                               : instance)
+                                                       .Select(instance => (uint?)instanceParser.Invoke(instance!))
+                                                       .GetValueOrDefault();
+                   }
 
-                   return new MarkData(markName, mapName, map.TerritoryId, map.RowId, instance, new Vector2(x, y));
+                   return new MarkData(markName, mapName, map.TerritoryId, map.RowId, instanceOut, new Vector2(x, y));
                });
     }
 
     protected static string Dump(GroupCollection groups)
     {
-        var groupStrings = groups.Values.Select(group => $"({group.Name}:{group.Value})");
+        var groupStrings = groups.Values.Select(group => $"({group.Name}:{string.Join(",",group.Captures.ToList().ConvertAll(e=>e.Value))}))");
         return string.Join(',', groupStrings);
     }
 
