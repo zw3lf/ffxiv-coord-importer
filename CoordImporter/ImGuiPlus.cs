@@ -131,7 +131,14 @@ public static class ImGuiPlus
     ) =>
         ImRaii.Table(id, numColumns, ImGuiTableFlags.None, outerSize).Contain(contents);
 
-    public static void Contain(this ImRaii.IEndObject context, Action? contents)
+    public static void Contain(this ImRaii.TableDisposable context, Action? contents)
+    {
+        using var visible = context;
+        if (!visible) return;
+        contents?.Invoke();
+    }
+
+    public static void Contain(this ImRaii.TreeNodeDisposable context, Action? contents)
     {
         using var visible = context;
         if (!visible) return;
